@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\MedicineController;
 use App\Models\Article;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,7 @@ Route::middleware(['auth','role:admin'])->group(function () {
     Route::put('/admin/obat/{medicine}', [MedicineController::class, 'update'])->name('medicines.update');
     Route::delete('/admin/obat/{medicine}', [MedicineController::class, 'destroy'])->name('medicines.destroy');
     Route::patch('/admin/obat/{medicine}/toggle', [MedicineController::class, 'toggleAvailability'])->name('medicines.toggle');
+    Route::resource('knowledge', KnowledgeBaseController::class)->only(['index', 'create', 'store', 'destroy']);
 
 });
 
