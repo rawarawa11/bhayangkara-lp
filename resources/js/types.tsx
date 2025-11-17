@@ -45,5 +45,24 @@ export type ArticleSummary = {
     meta_title?: string | null
 }
 
-export class User {
+export type User = {
+    id: number;
+    name: string;
+    email: string;
+    email_verified_at: string | null;
+    password: string;
+    remember_token: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export type Medicine = {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+    image: string | null;
+    is_available: boolean;
+    created_at: string;
+    updated_at: string;
 }

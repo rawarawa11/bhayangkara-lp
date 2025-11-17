@@ -13,10 +13,9 @@ type ArticleSummary = {
     image: string | null
     published_at: string
     meta_title?: string | null
-    excerpt?: string // Added excerpt field
+    body?: string // Added excerpt field
 }
 
-// Professional image handling with fallback
 const getImageUrl = (path: string | null) =>
     path ? `/storage/${path}` : '/images/placeholder-news.jpg'
 
@@ -44,7 +43,6 @@ export default function ArticlesSection({ articles }: { articles: ArticleSummary
                                 key={article.id}
                                 className="group overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-blue-100"
                             >
-                                {/* Image Container */}
                                 <div className="relative overflow-hidden">
                                     <AspectRatio ratio={16 / 9}>
                                         <img
@@ -53,18 +51,15 @@ export default function ArticlesSection({ articles }: { articles: ArticleSummary
                                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
                                     </AspectRatio>
-                                    {/* Overlay gradient */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 </div>
 
                                 <CardHeader className="space-y-3 pb-4">
-                                    {/* Date with icon */}
                                     <div className="flex items-center text-sm text-gray-500">
                                         <Calendar className="h-4 w-4 mr-2" />
                                         {dayjs(article.published_at).format('DD MMMM YYYY')}
                                     </div>
 
-                                    {/* Article Title */}
                                     <CardTitle className="line-clamp-2 text-lg font-semibold leading-7 text-gray-900 group-hover:text-blue-600 transition-colors">
                                         <Link
                                             href={route('articles.public.show', article.slug)}
@@ -74,10 +69,9 @@ export default function ArticlesSection({ articles }: { articles: ArticleSummary
                                         </Link>
                                     </CardTitle>
 
-                                    {/* Excerpt - First two lines of content */}
-                                    {article.excerpt && (
+                                    {article.body && (
                                         <CardDescription className="line-clamp-2 text-sm leading-6 text-gray-600 mt-2">
-                                            {article.excerpt}
+                                            {article.body}
                                         </CardDescription>
                                     )}
                                 </CardHeader>
@@ -114,7 +108,6 @@ export default function ArticlesSection({ articles }: { articles: ArticleSummary
                     </div>
                 )}
 
-                {/* View All Button - Centered */}
                 {hasArticles && (
                     <div className="mt-12 text-center">
                         <Button
