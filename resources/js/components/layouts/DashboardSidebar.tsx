@@ -1,4 +1,4 @@
-import { Home, Newspaper, Pill, Search, Settings } from "lucide-react"
+import {Book, Home, Newspaper, Pill, Search, Settings} from "lucide-react"
 import {
     Sidebar,
     SidebarContent,
@@ -24,6 +24,7 @@ const items: Item[] = [
     { title: "Dashboard", routeName: "dashboard", icon: Home },
     { title: "Manajemen Artikel", routeName: "articles.index", icon: Newspaper },
     { title: "Manajemen Obat", routeName: "medicines.index", icon: Pill },
+    { title: "Manajemen Chatbot", routeName: "knowledge.index", icon: Book},
     { title: "Search", href: "#", icon: Search },
     { title: "Settings", href: "#", icon: Settings },
 ]

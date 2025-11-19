@@ -16,7 +16,7 @@ export default function KnowledgeBaseCreate() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault()
-        post(route('admin.knowledge.store'))
+        post(route('knowledge.store'))
     }
 
     return (
@@ -25,7 +25,7 @@ export default function KnowledgeBaseCreate() {
             <div className="container mx-auto max-w-3xl p-6">
                 <div className="mb-6">
                     <Button asChild variant="ghost" className="pl-0">
-                        <Link href={route('admin.knowledge.index')}><ArrowLeft className="mr-2 h-4 w-4" /> Kembali</Link>
+                        <Link href={route('knowledge.index')}><ArrowLeft className="mr-2 h-4 w-4" /> Kembali</Link>
                     </Button>
                 </div>
                 <form onSubmit={submit}>

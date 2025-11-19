@@ -15,7 +15,7 @@ export default function KnowledgeBaseIndex() {
     const { notes } = usePage<PageProps>().props
 
     const handleDelete = (note: Note) => {
-        router.delete(route('admin.knowledge.destroy', note.id))
+        router.delete(route('knowledge.destroy', note.id))
     }
 
     return (
@@ -28,7 +28,7 @@ export default function KnowledgeBaseIndex() {
                         <p className="text-muted-foreground">Daftar informasi yang digunakan oleh AI chatbot.</p>
                     </div>
                     <Button asChild>
-                        <Link href={route('admin.knowledge.create')}>
+                        <Link href={route('knowledge.create')}>
                             <PlusCircle className="mr-2 h-4 w-4" /> Tambah Pengetahuan
                         </Link>
                     </Button>

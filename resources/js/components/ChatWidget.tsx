@@ -73,7 +73,6 @@ export default function ChatWidget() {
                 </Button>
             </CardHeader>
 
-            {/* 3. REPAIR: Removed 'overflow-hidden' from CardContent */}
             <CardContent className="flex-1 min-h-0 p-0 flex flex-col">
                 <ScrollArea className="flex-1 min-h-0" viewportRef={viewportRef}>
                     <div className="space-y-4 p-4">
@@ -97,7 +96,6 @@ export default function ChatWidget() {
                     </div>
                 </ScrollArea>
 
-                {/* This input div will no longer be pushed out of view */}
                 <div className="p-3 border-t bg-white flex gap-2 flex-none">
                     <Input
                         value={input}

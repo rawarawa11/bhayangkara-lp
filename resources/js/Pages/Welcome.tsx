@@ -7,7 +7,7 @@ import ArticlesSection from '@/components/sections/ArticleSection'
 import Footer from '@/components/Footer'
 import { ArticleSummary } from '@/types'
 import CtaSection from "@/components/sections/CtaSection";
-import ChatWidget from "@/components/ChatWidge";
+import ChatWidget from "@/components/ChatWidget";
 
 type User = {
     id: number;

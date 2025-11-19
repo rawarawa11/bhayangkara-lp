@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\KnowledgeBase;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use OpenAI\Laravel\Facades\OpenAI;
+use Gemini;
+use Throwable;
 
 class KnowledgeBaseController extends Controller
 {
@@ -30,28 +31,34 @@ class KnowledgeBaseController extends Controller
         $content = $data['content'];
 
         try {
-            $embeddingResponse = OpenAI::embeddings()->create([
-                'model' => 'text-embedding-ada-002', // 1536 dimensions
-                'input' => $content,
-            ]);
+            $apiKey = env('GEMINI_API_KEY');
+            if (empty($apiKey)) {
+                throw new \Exception('GEMINI_API_KEY is not set in .env file.');
+            }
 
-            $embedding = $embeddingResponse->embeddings[0]->embedding;
+            $client = Gemini::client($apiKey);
+
+            $response = $client->embeddingModel('text-embedding-004')
+                ->embedContent($content);
+
+            $embedding = $response->embedding->values;
 
             KnowledgeBase::create([
                 'content' => $content,
                 'embedding' => $embedding,
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
+            report($e);
             return back()->withErrors(['api_error' => 'Could not generate embedding: ' . $e->getMessage()]);
         }
 
-        return redirect()->route('admin.knowledge.index')->with('success', 'Knowledge base entry created.');
+        return redirect()->route('knowledge.index')->with('success', 'Knowledge base entry created.');
     }
 
     public function destroy(KnowledgeBase $knowledge)
     {
         $knowledge->delete();
-        return redirect()->route('admin.knowledge.index')->with('success', 'Knowledge base entry deleted.');
+        return redirect()->route('knowledge.index')->with('success', 'Knowledge base entry deleted.');
     }
 }

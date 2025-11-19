@@ -4,70 +4,135 @@ namespace App\Http\Controllers;
 
 use App\Models\KnowledgeBase;
 use Illuminate\Http\Request;
-use OpenAI\Laravel\Facades\OpenAI;
+use Gemini;
+use Throwable;
 
 class ChatbotController extends Controller
 {
     /**
-     * Handle the incoming chat message
+     * Handle the incoming chat message.
      */
     public function handle(Request $request)
     {
-        $request->validate(['message' => 'required|string|max:500']);
-        $userQuestion = $request->input('message');
+        $validated = $request->validate([
+            'message' => 'required|string|min:1|max:500',
+        ]);
+
+        $userQuestion = $validated['message'];
+        $context = null; // We will try to find this
 
         try {
-            $embeddingResponse = OpenAI::embeddings()->create([
-                'model' => 'text-embedding-ada-002',
-                'input' => $userQuestion,
-            ]);
-            $questionVector = $embeddingResponse->embeddings[0]->embedding;
+            $apiKey = env('GEMINI_API_KEY');
+            if (empty($apiKey)) {
+                throw new \Exception('GEMINI_API_KEY is not set in .env file.');
+            }
+
+            $client = Gemini::client($apiKey);
+
             $allNotes = KnowledgeBase::all();
 
-            if ($allNotes->isEmpty()) {
-                return response()->json(['reply' => 'Maaf, saya belum memiliki pengetahuan untuk menjawab itu.']);
+            if (!$allNotes->isEmpty()) {
+                $embeddingResponse = $client->embeddingModel('text-embedding-004')
+                    ->embedContent($userQuestion);
+                $questionVector = $embeddingResponse->embedding->values;
+
+                $bestMatch = $this->findBestMatch($questionVector, $allNotes);
+
+                $similarityThreshold = 0.75;
+                if ($bestMatch && $bestMatch['score'] >= $similarityThreshold) {
+                    $context = $bestMatch['note']->content;
+                }
             }
+            $systemPrompt = $this->createSystemPrompt($context);
 
-            $scores = [];
-            foreach ($allNotes as $note) {
-                $scores[$note->id] = $this->cosineSimilarity($questionVector, $note->embedding);
-            }
+            $finalPrompt = $this->buildFinalPrompt($systemPrompt, $userQuestion, $context);
+            $response = $client->generativeModel(model: 'gemini-2.0-flash')
+                ->generateContent($finalPrompt);
 
-            arsort($scores);
-            $topNoteId = array_key_first($scores);
-            $topScore = $scores[$topNoteId];
+            return response()->json(['reply' => $response->text()]);
 
-            $similarityThreshold = 0.75;
-
-            if ($topScore < $similarityThreshold) {
-                return response()->json(['reply' => 'Maaf, saya tidak yakin memiliki informasi yang relevan mengenai hal itu.']);
-            }
-
-            $context = $allNotes->find($topNoteId)->content;
-
-            $systemPrompt = "You are a professional assistant for RS Bhayangkara Banda Aceh.
-            You must answer the user's question based *only* on the context provided below.
-            If the answer is not in the context, politely say 'Maaf, saya tidak memiliki informasi tersebut.'
-            Answer in Indonesian.";
-
-            $chatResponse = OpenAI::chat()->create([
-                'model' => 'gpt-3.5-turbo',
-                'messages' => [
-                    ['role' => 'system', 'content' => $systemPrompt],
-                    ['role' => 'user', 'content' => "Here is the only context you can use:\n\n" . $context],
-                    ['role' => 'user', 'content' => "Here is the user's question:\n\n" . $userQuestion],
-                ],
-            ]);
-
-            $botReply = $chatResponse->choices[0]->message->content;
-
-            return response()->json(['reply' => $botReply]);
-
-        } catch (\Exception $e) {
-            return response()->json(['reply' => 'Maaf, sedang terjadi kesalahan pada sistem AI. ' . $e->getMessage()], 500);
+        } catch (Throwable $e) {
+            report($e);
+            return response()->json(['reply' => 'Maaf, terjadi kesalahan pada sistem AI kami. Silakan coba lagi nanti.'], 500);
         }
     }
 
+    /**
+     * Creates a dynamic system prompt based on whether context is available.
+     */
+    private function createSystemPrompt(?string $context): string
+    {
+        $basePrompt = "Anda adalah Asisten Virtual AI dari RS Bhayangkara Banda Aceh.
+        Sapa pengguna dengan ramah (misalnya 'Halo!' atau 'Tentu, saya bantu').
+        Jawablah dalam bahasa Indonesia yang profesional, sopan, dan empatik.
+        Identitas Anda adalah asisten, bukan dokter. Jangan pernah memberikan diagnosis medis.
+        Anda boleh menjawab pertanyaan umum tentang kesehatan (seperti 'apa itu demam?').";
+
+        if ($context) {
+            $ragInstruction = "PENTING: Untuk pertanyaan berikut, Anda HARUS menjawab HANYA berdasarkan konteks yang diberikan.
+            Jangan tambahkan informasi di luar konteks.
+            Jika jawaban tidak ada di dalam konteks, katakan 'Maaf, saya tidak memiliki informasi spesifik mengenai hal itu.'";
+
+            return $basePrompt . "\n\n" . $ragInstruction;
+        } else {
+            $generalInstruction = "Anda akan menjawab pertanyaan umum dari pengguna.
+            Jika pengguna menanyakan informasi spesifik tentang RS Bhayangkara (seperti jadwal dokter tertentu, biaya, atau nomor antrian) yang Anda tidak tahu, katakan dengan sopan:
+            'Untuk informasi spesifik seperti itu, saya sarankan untuk menghubungi resepsionis kami di (0651) 123-456 atau datang langsung ke rumah sakit.'";
+
+            return $basePrompt . "\n\n" . $generalInstruction;
+        }
+    }
+
+    /**
+     * Builds the final string to send to the Gemini API.
+     */
+    private function buildFinalPrompt(string $systemPrompt, string $userQuestion, ?string $context): string
+    {
+        if ($context) {
+            // RAG format
+            return $systemPrompt . "\n\n" .
+                "--- KONTEKS (GUNAKAN INI) ---:\n" . $context . "\n\n" .
+                "--- PERTANYAAN PENGGUNA ---:\n" . $userQuestion . "\n\n" .
+                "--- JAWABAN (HANYA DARI KONTEKS) ---:\n";
+        } else {
+            // General chat format
+            return $systemPrompt . "\n\n" .
+                "--- PERTANYAAN PENGGUNA ---:\n" . $userQuestion . "\n\n" .
+                "--- JAWABAN ---:\n";
+        }
+    }
+
+    /**
+     * Finds the best matching note from the collection.
+     */
+    private function findBestMatch(array $questionVector, $allNotes): ?array
+    {
+        $bestScore = -1.0;
+        $bestNote = null;
+
+        foreach ($allNotes as $note) {
+            if (empty($note->embedding) || !is_array($note->embedding)) {
+                continue;
+            }
+
+            $score = $this->cosineSimilarity($questionVector, $note->embedding);
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestNote = $note;
+            }
+        }
+
+        if ($bestNote === null) {
+            return null;
+        }
+
+        return ['note' => $bestNote, 'score' => $bestScore];
+    }
+
+    /**
+     * Calculates the Cosine Similarity between two vectors.
+     */
     private function cosineSimilarity(array $a, array $b): float
     {
         $dotProduct = 0.0;
@@ -75,14 +140,14 @@ class ChatbotController extends Controller
         $magB = 0.0;
 
         $count = count($a);
-        if ($count !== count($b)) {
+        if ($count === 0 || $count !== count($b)) {
             return 0.0;
         }
 
         for ($i = 0; $i < $count; $i++) {
-            $dotProduct += $a[$i] * $b[$i];
-            $magA += $a[$i] * $a[$i];
-            $magB += $b[$i] * $b[$i];
+            $dotProduct += ($a[$i] ?? 0) * ($b[$i] ?? 0);
+            $magA += ($a[$i] ?? 0) ** 2;
+            $magB += ($b[$i] ?? 0) ** 2;
         }
 
         $magA = sqrt($magA);

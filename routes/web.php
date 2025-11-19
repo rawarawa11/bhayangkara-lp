@@ -38,9 +38,8 @@ Route::middleware(['auth','role:admin'])->group(function () {
     Route::get('/admin/obat/{medicine}/edit', [MedicineController::class, 'edit'])->name('medicines.edit');
     Route::put('/admin/obat/{medicine}', [MedicineController::class, 'update'])->name('medicines.update');
     Route::delete('/admin/obat/{medicine}', [MedicineController::class, 'destroy'])->name('medicines.destroy');
-    Route::patch('/admin/obat/{medicine}/toggle', [MedicineController::class, 'toggleAvailability'])->name('medicines.toggle');
+    Route::patch('/medicines/{medicine}/toggle', [MedicineController::class, 'toggleAvailability'])->name('medicines.toggle-availability');
     Route::resource('knowledge', KnowledgeBaseController::class)->only(['index', 'create', 'store', 'destroy']);
-
 });
 
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
