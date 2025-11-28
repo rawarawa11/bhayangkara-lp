@@ -1,60 +1,154 @@
-import {Book, Home, Newspaper, Pill, Search, Settings} from "lucide-react"
+import * as React from "react"
+import { Link } from '@inertiajs/react'
+import { route } from 'ziggy-js'
+import {
+    LayoutDashboard,
+    Newspaper,
+    Pill,
+    BookOpen,
+    Hospital,
+    Settings,
+    LifeBuoy
+} from 'lucide-react'
+
 import {
     Sidebar,
     SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
+    SidebarFooter,
+    SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    type SidebarProps,
-} from "@/components/ui/sidebar"
-import { Link } from "@inertiajs/react"
-import {route} from "ziggy-js"
+    SidebarRail,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarSeparator,
+} from '@/components/ui/sidebar'
 
-type Item = {
-    title: string
-    routeName?: string
-    href?: string
-    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
-}
-
-const items: Item[] = [
-    { title: "Dashboard", routeName: "dashboard", icon: Home },
-    { title: "Manajemen Artikel", routeName: "articles.index", icon: Newspaper },
-    { title: "Manajemen Obat", routeName: "medicines.index", icon: Pill },
-    { title: "Manajemen Chatbot", routeName: "knowledge.index", icon: Book},
-    { title: "Search", href: "#", icon: Search },
-    { title: "Settings", href: "#", icon: Settings },
+// Menu configuration
+const navMain = [
+    {
+        title: "Dashboard",
+        url: "dashboard",
+        icon: LayoutDashboard,
+        // Active if exact match
+        isActive: (currentRoute: string) => currentRoute === 'dashboard',
+    },
 ]
 
-export function AppSidebar(props: SidebarProps) {
+const navManagement = [
+    {
+        title: "Artikel",
+        url: "articles.index",
+        icon: Newspaper,
+        // Active for index, create, edit, etc.
+        isActive: (currentRoute: string) => currentRoute.startsWith('articles'),
+    },
+    {
+        title: "Obat-obatan",
+        url: "medicines.index",
+        icon: Pill,
+        // Active for all medicine routes
+        isActive: (currentRoute: string) => currentRoute.startsWith('medicines'),
+    },
+    {
+        title: "Knowledge Base",
+        url: "knowledge.index",
+        icon: BookOpen,
+        // Active for all knowledge routes
+        isActive: (currentRoute: string) => currentRoute.startsWith('knowledge'),
+    },
+]
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const currentRoute = route().current() as string;
+
     return (
-        <Sidebar {...props}>
+        <Sidebar collapsible="icon" {...props}>
+            <SidebarHeader>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild>
+                            <Link href={route('dashboard')}>
+                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                                    <Hospital className="size-4" />
+                                </div>
+                                <div className="grid flex-1 text-left text-sm leading-tight">
+                                    <span className="truncate font-semibold">RS Bhayangkara</span>
+                                    <span className="truncate text-xs text-muted-foreground">Admin Panel</span>
+                                </div>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarHeader>
+
             <SidebarContent>
+                {/* Group 1: General */}
                 <SidebarGroup>
-                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupLabel>General</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => {
-                                const Icon = item.icon
-                                const href = item.routeName ? route(item.routeName) : item.href ?? "#"
-                                return (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild>
-                                            <Link href={href}>
-                                                <Icon />
-                                                <span>{item.title}</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                )
-                            })}
+                            {navMain.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        tooltip={item.title}
+                                        isActive={item.isActive(currentRoute)}
+                                        className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary hover:bg-accent hover:text-accent-foreground transition-colors"
+                                    >
+                                        <Link href={route(item.url)}>
+                                            <item.icon className="size-4" />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                {/* Group 2: Management */}
+                <SidebarGroup>
+                    <SidebarGroupLabel>Manajemen</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {navManagement.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        tooltip={item.title}
+                                        isActive={item.isActive(currentRoute)}
+                                        className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary hover:bg-accent hover:text-accent-foreground transition-colors"
+                                    >
+                                        <Link href={route(item.url)}>
+                                            <item.icon className="size-4" />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+
+            <div className="border-t border-gray-200 my-2" />
+
+            <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="Pengaturan">
+                            <Link href={'#'}>
+                                <Settings className="size-4" />
+                                <span>Pengaturan Akun</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
+            <SidebarRail />
         </Sidebar>
     )
 }

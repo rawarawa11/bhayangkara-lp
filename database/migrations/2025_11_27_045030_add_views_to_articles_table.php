@@ -9,9 +9,11 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        //
+        Schema::table('articles', function (Blueprint $table) {
+            $table->unsignedBigInteger('views')->default(0);
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('articles', function (Blueprint $table) {
+            $table->dropColumn('views');
+        });
     }
 };

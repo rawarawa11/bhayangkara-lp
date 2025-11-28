@@ -41,8 +41,21 @@ class DashboardController extends Controller
             ->map(fn ($count, $tag) => ['tag' => $tag, 'count' => $count])
             ->values();
 
-         return Inertia::render('Admin/Dashboard', compact(
-             'total','published','drafts','scheduled','publishedToday','recent','trend','topTags'
-         ));
+        {
+            return Inertia::render('Admin/Dashboard', [
+                'total'          => Article::count(),
+                'published'      => Article::published()->count(),
+                'drafts'         => Article::draft()->count(),
+                'scheduled'      => Article::scheduled()->count(),
+                'publishedToday' => Article::published()->whereDate('published_at', today())->count(),
+                'totalViews'     => (int) Article::sum('views'),
+                'popular'        => Article::published()
+                    ->orderByDesc('views')
+                    ->take(5)
+                    ->get(['id', 'title', 'status', 'published_at', 'views']),
+                'recent'         => Article::latest()->take(5)->get(),
+                'topTags'        => [],
+            ]);
+        }
     }
 }

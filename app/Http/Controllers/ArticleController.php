@@ -13,13 +13,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use Inertia\Response;
+use Illuminate\Support\Facades\Cookie;
 
 //use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ArticleController extends Controller
 {
-//    use AuthorizesRequests;
-
     public function PublicIndex(Request $request) {
         $q = trim((string) $request->get('q',''));
         $sort = $request->get('sort','published_at_desc');
@@ -56,6 +55,12 @@ class ArticleController extends Controller
             ->latest('published_at')
             ->take(3)
             ->get();
+
+        $cookieName = 'viewed_article_' . $article->id;
+        if (!Cookie::get($cookieName)) {
+            $article->increment('views');
+            Cookie::queue($cookieName, 'true', 1440);
+        }
 
         return Inertia::render('Articles/Show', [
             'article' => $article,
