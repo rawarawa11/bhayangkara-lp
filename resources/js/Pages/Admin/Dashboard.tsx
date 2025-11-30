@@ -22,6 +22,8 @@ type DashboardSummaryProps = {
     recent: RecentItem[]
     popular: RecentItem[]
     topTags: TopTag[]
+    totalVisitors:number;
+    visitorsToday:number;
 }
 
 export default function Dashboard(props: DashboardSummaryProps) {
@@ -58,6 +60,18 @@ export default function Dashboard(props: DashboardSummaryProps) {
                         value={props.scheduled}
                         icon={FileClock}
                         className="bg-purple-50 text-purple-700 border-purple-200"
+                    />
+                    <StatCard
+                        title="Total Pengunjung"
+                        value={props.totalVisitors}
+                        icon={TrendingUp}
+                        className="bg-orange-50 text-orange-700 border-orange-100"
+                    />
+                    <StatCard
+                        title="Pengunjung Hari Ini"
+                        value={props.visitorsToday}
+                        icon={CheckCircle2}
+                        className="bg-teal-50 text-teal-700 border-teal-100"
                     />
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -3,11 +3,13 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\MedicineController;
 use App\Models\Article;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Middleware\TrackVisitor;
 
 Route::get('/', function () {
     $latest_articles = Article::published()->latest()->take(3)->get();
@@ -15,7 +17,7 @@ Route::get('/', function () {
     return Inertia::render('Welcome', [
         'articles' => $latest_articles
     ]);
-})->name('home');
+})->middleware(TrackVisitor::class)->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('masuk', [AuthController::class, 'showLogin'])->name('login');
@@ -40,6 +42,16 @@ Route::middleware(['auth','role:admin'])->group(function () {
     Route::delete('/admin/obat/{medicine}', [MedicineController::class, 'destroy'])->name('medicines.destroy');
     Route::patch('/medicines/{medicine}/toggle', [MedicineController::class, 'toggleAvailability'])->name('medicines.toggle-availability');
     Route::resource('knowledge', KnowledgeBaseController::class)->only(['index', 'create', 'store', 'destroy']);
+    Route::resource('schedules', DoctorScheduleController::class)
+        ->names([
+            'index' => 'schedules.index',
+            'create' => 'schedules.create',
+            'store' => 'schedules.store',
+            'edit' => 'schedules.edit',
+            'update' => 'schedules.update',
+            'destroy' => 'schedules.destroy',
+        ]);
+
 });
 
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');

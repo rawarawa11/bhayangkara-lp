@@ -8,6 +8,7 @@ import Footer from '@/components/Footer'
 import { ArticleSummary } from '@/types'
 import CtaSection from "@/components/sections/CtaSection";
 import ChatWidget from "@/components/ChatWidget";
+import CookieConsent from "@/components/CookiesConsent"
 
 type User = {
     id: number;
@@ -46,6 +47,7 @@ export default function Welcome() {
             </main>
             <Footer />
             <ChatWidget />
+            <CookieConsent/>
         </>
     )
 }

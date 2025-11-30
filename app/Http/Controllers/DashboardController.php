@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Visitor;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -49,6 +50,8 @@ class DashboardController extends Controller
                 'scheduled'      => Article::scheduled()->count(),
                 'publishedToday' => Article::published()->whereDate('published_at', today())->count(),
                 'totalViews'     => (int) Article::sum('views'),
+                'totalVisitors'  => Visitor::count(),
+                'visitorsToday'  => Visitor::today()->count(),
                 'popular'        => Article::published()
                     ->orderByDesc('views')
                     ->take(5)

@@ -26,13 +26,12 @@ import {
     SidebarSeparator,
 } from '@/components/ui/sidebar'
 
-// Menu configuration
+// Pengaturan Menu NAvigasi
 const navMain = [
     {
         title: "Dashboard",
         url: "dashboard",
         icon: LayoutDashboard,
-        // Active if exact match
         isActive: (currentRoute: string) => currentRoute === 'dashboard',
     },
 ]
@@ -42,23 +41,26 @@ const navManagement = [
         title: "Artikel",
         url: "articles.index",
         icon: Newspaper,
-        // Active for index, create, edit, etc.
         isActive: (currentRoute: string) => currentRoute.startsWith('articles'),
     },
     {
         title: "Obat-obatan",
         url: "medicines.index",
         icon: Pill,
-        // Active for all medicine routes
         isActive: (currentRoute: string) => currentRoute.startsWith('medicines'),
     },
     {
         title: "Knowledge Base",
         url: "knowledge.index",
         icon: BookOpen,
-        // Active for all knowledge routes
         isActive: (currentRoute: string) => currentRoute.startsWith('knowledge'),
     },
+    {
+        title: "Jadwal Dokter",
+        url: "schedules.index",
+        icon: LifeBuoy,
+        isActive: (currentRoute: string) => currentRoute.startsWith('schedules'),
+    }
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
