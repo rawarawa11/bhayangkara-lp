@@ -3,12 +3,11 @@ import { Head, Link, useForm } from '@inertiajs/react'
 import { route } from 'ziggy-js'
 import dayjs from 'dayjs'
 import AdminLayout from '@/components/layouts/DashboardLayout'
-
-// --- Komponen ShadCN ---
 import { Button, buttonVariants } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+// 1. Re-added Textarea import here
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -16,12 +15,14 @@ import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { ArrowLeft, CalendarIcon, Loader2, UploadCloud } from 'lucide-react'
 
-// --- Tipe Data Form (sesuai validasi controller) ---
+// Import the fixed SimpleEditor
+import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
+
 interface ArticleFormData {
     title: string;
     body: string;
     image: File | null;
-    tags: string[]; // Ini akan dikelola oleh `tagsInput`
+    tags: string[];
     meta_title: string;
     meta_description: string;
     meta_keywords: string;
@@ -29,7 +30,6 @@ interface ArticleFormData {
     published_at: Date | null;
 }
 
-// --- Komponen DatePicker (helper) ---
 function DatePicker({ value, onChange, disabled }: { value: Date | null, onChange: (date: Date | undefined) => void, disabled?: boolean }) {
     return (
         <Popover>
@@ -58,14 +58,9 @@ function DatePicker({ value, onChange, disabled }: { value: Date | null, onChang
     )
 }
 
-// --- Halaman Utama ---
 export default function ArticleCreate() {
-
-    // State tambahan untuk UI
     const [tagsInput, setTagsInput] = useState<string>('');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-    // Hook Form dari Inertia
     const { data, setData, post, processing, errors, transform } = useForm<ArticleFormData>({
         title: '',
         body: '',
@@ -78,21 +73,17 @@ export default function ArticleCreate() {
         published_at: null,
     });
 
-    // Transformasi data sebelum dikirim
-    // Mengubah string tag menjadi array dan memformat tanggal
     transform((formData) => ({
         ...formData,
         tags: tagsInput.split(',').map(tag => tag.trim()).filter(Boolean),
         published_at: formData.published_at ? dayjs(formData.published_at).format('YYYY-MM-DD HH:mm:ss') : null,
     }));
 
-    // Handler untuk pengiriman form
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('articles.store'));
     };
 
-    // Handler untuk perubahan gambar
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -108,7 +99,6 @@ export default function ArticleCreate() {
             <form onSubmit={submit}>
                 <div className="container mx-auto p-4 md:p-6">
 
-                    {/* Header Halaman */}
                     <div className="flex items-center justify-between gap-4 mb-6">
                         <div className="flex items-center gap-4">
                             <Link
@@ -125,10 +115,8 @@ export default function ArticleCreate() {
                         </Button>
                     </div>
 
-                    {/* Konten Grid 2 Kolom */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                        {/* Kolom Utama (Kiri) */}
                         <div className="lg:col-span-2 space-y-6">
                             <Card>
                                 <CardHeader>
@@ -148,13 +136,13 @@ export default function ArticleCreate() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="body">Isi (Body)</Label>
-                                        <Textarea
-                                            id="body"
-                                            value={data.body}
-                                            onChange={(e) => setData('body', e.target.value)}
-                                            placeholder="Tulis isi artikel Anda di sini..."
-                                            rows={15}
-                                        />
+                                        {/* Tiptap Editor */}
+                                        <div className="border rounded-md bg-white min-h-[500px]">
+                                            <SimpleEditor
+                                                value={data.body}
+                                                onChange={(val) => setData('body', val)}
+                                            />
+                                        </div>
                                         {errors.body && <p className="text-sm text-red-500">{errors.body}</p>}
                                     </div>
                                 </CardContent>
@@ -187,8 +175,8 @@ export default function ArticleCreate() {
                             </Card>
                         </div>
 
-                        {/* Kolom Samping (Kanan) */}
                         <div className="lg:col-span-1 space-y-6">
+                            {/* ... (Publikasi Card is fine) ... */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Publikasi</CardTitle>
@@ -248,6 +236,7 @@ export default function ArticleCreate() {
                                     <CardTitle>SEO Meta Data</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
+                                    {/* ... Meta Title ... */}
                                     <div className="space-y-2">
                                         <Label htmlFor="meta_title">Meta Title</Label>
                                         <Input
@@ -258,6 +247,8 @@ export default function ArticleCreate() {
                                         />
                                         {errors.meta_title && <p className="text-sm text-red-500">{errors.meta_title}</p>}
                                     </div>
+
+                                    {/* Textarea for Description */}
                                     <div className="space-y-2">
                                         <Label htmlFor="meta_description">Meta Description</Label>
                                         <Textarea
@@ -269,6 +260,7 @@ export default function ArticleCreate() {
                                         />
                                         {errors.meta_description && <p className="text-sm text-red-500">{errors.meta_description}</p>}
                                     </div>
+
                                     <div className="space-y-2">
                                         <Label htmlFor="meta_keywords">Meta Keywords</Label>
                                         <Input

@@ -1,10 +1,14 @@
 import { Link } from '@inertiajs/react'
 import { route } from 'ziggy-js'
 import dayjs from 'dayjs'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import 'dayjs/locale/id'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { Button } from '@/components/ui/button'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
-import { FileText, Calendar, ArrowRight } from 'lucide-react'
+import { CalendarDays, ArrowRight, FileText, Clock } from 'lucide-react'
+
+dayjs.locale('id')
+dayjs.extend(relativeTime)
 
 type ArticleSummary = {
     id: number
@@ -13,115 +17,132 @@ type ArticleSummary = {
     image: string | null
     published_at: string
     meta_title?: string | null
-    body?: string // Added excerpt field
+    body?: string
 }
 
 const getImageUrl = (path: string | null) =>
-    path ? `/storage/${path}` : '/images/placeholder-news.jpg'
+    path ? `/storage/${path}` : 'https://placehold.co/800x600/f1f5f9/94a3b8?text=News'
+
+const getExcerpt = (html: string = '', limit = 100) => {
+    const text = html.replace(/<[^>]+>/g, '')
+    return text.length > limit ? text.substring(0, limit) + '...' : text
+}
 
 export default function ArticlesSection({ articles }: { articles: ArticleSummary[] }) {
     const hasArticles = articles && articles.length > 0
 
     return (
-        <section className="bg-white py-16 lg:py-24">
+        <section className="bg-slate-50 py-20 lg:py-28">
             <div className="container mx-auto max-w-7xl px-4 sm:px-6">
-                {/* Section Header - More professional styling */}
-                <div className="mb-12 text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                        Berita & Artikel Terkini
-                    </h2>
-                    <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-                        Informasi terbaru dan perkembangan terkini dari RS Bhayangkara Polri Banda Aceh
-                    </p>
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                    <div className="max-w-2xl">
+                        <span className="text-sm font-bold text-blue-600 uppercase tracking-wider mb-2 block">
+                            Informasi Terkini
+                        </span>
+                        <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                            Berita & Artikel Kesehatan
+                        </h2>
+                        <p className="mt-4 text-lg text-slate-600 leading-relaxed">
+                            Dapatkan update terbaru seputar layanan RS Bhayangkara, agenda kegiatan, serta artikel edukasi kesehatan yang terpercaya.
+                        </p>
+                    </div>
+
+                    <Button
+                        asChild
+                        variant="outline"
+                        size="lg"
+                        className="hidden md:inline-flex border-slate-300 text-slate-700 hover:text-blue-700 hover:bg-white hover:border-blue-200"
+                    >
+                        <Link href={route('articles.public.index')} className="group">
+                            Lihat Semua Berita
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </Link>
+                    </Button>
                 </div>
 
-                {/* Articles Grid */}
                 {hasArticles ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {articles.map((article) => (
-                            <Card
+                            <article
                                 key={article.id}
-                                className="group overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-blue-100"
+                                className="group flex flex-col bg-white border border-slate-200 rounded-lg overflow-hidden hover:border-blue-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                             >
-                                <div className="relative overflow-hidden">
-                                    <AspectRatio ratio={16 / 9}>
-                                        <img
-                                            src={getImageUrl(article.image)}
-                                            alt={article.meta_title || article.title}
-                                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                        />
-                                    </AspectRatio>
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                </div>
+                                {/* Full Bleed Image (Rigid, No Padding) */}
+                                <Link href={route('articles.public.show', article.slug)} className="block aspect-[16/9] overflow-hidden relative bg-slate-100">
+                                    <img
+                                        src={getImageUrl(article.image)}
+                                        alt={article.title}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
+                                    {/* Optional Overlay on Hover */}
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+                                </Link>
 
-                                <CardHeader className="space-y-3 pb-4">
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <Calendar className="h-4 w-4 mr-2" />
-                                        {dayjs(article.published_at).format('DD MMMM YYYY')}
+                                {/* Content with Padding */}
+                                <div className="flex flex-col flex-grow p-6">
+                                    {/* Date & Meta */}
+                                    <div className="flex items-center justify-between gap-2 mb-3 text-xs text-slate-500 font-medium">
+                                        <span className="flex items-center gap-1.5 text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">
+                                            <CalendarDays className="h-3.5 w-3.5" />
+                                            {dayjs(article.published_at).format('DD MMM YYYY')}
+                                        </span>
+                                        <span className="flex items-center gap-1 text-slate-400">
+                                            <Clock className="h-3 w-3" />
+                                            {dayjs(article.published_at).fromNow(true)} yang lalu
+                                        </span>
                                     </div>
 
-                                    <CardTitle className="line-clamp-2 text-lg font-semibold leading-7 text-gray-900 group-hover:text-blue-600 transition-colors">
-                                        <Link
-                                            href={route('articles.public.show', article.slug)}
-                                            className="hover:no-underline"
-                                        >
+                                    <Link href={route('articles.public.show', article.slug)} className="mb-3 block">
+                                        <h3 className="text-xl font-bold text-slate-900 leading-snug group-hover:text-blue-700 transition-colors line-clamp-2">
                                             {article.title}
-                                        </Link>
-                                    </CardTitle>
+                                        </h3>
+                                    </Link>
 
-                                    {article.body && (
-                                        <CardDescription className="line-clamp-2 text-sm leading-6 text-gray-600 mt-2">
-                                            {article.body}
-                                        </CardDescription>
-                                    )}
-                                </CardHeader>
+                                    <p className="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-6 flex-grow">
+                                        {article.body
+                                            ? getExcerpt(article.body, 120)
+                                            : (article.meta_title || "Baca selengkapnya untuk informasi lebih lanjut.")}
+                                    </p>
 
-                                <CardContent className="pt-0">
-                                    <Button
-                                        asChild
-                                        variant="ghost"
-                                        className="group/btn px-0 font-medium text-blue-600 hover:text-blue-700 hover:bg-transparent"
-                                    >
+                                    <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                                         <Link
                                             href={route('articles.public.show', article.slug)}
-                                            className="flex items-center gap-1"
+                                            className="inline-flex items-center text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors"
                                         >
-                                            Baca Selengkapnya
-                                            <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                                            Baca Artikel <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                         </Link>
-                                    </Button>
-                                </CardContent>
-                            </Card>
+                                    </div>
+                                </div>
+                            </article>
                         ))}
                     </div>
                 ) : (
-                    /* Enhanced Empty State */
-                    <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                        <FileText className="mx-auto h-16 w-16 text-gray-400" />
-                        <h3 className="mt-6 text-xl font-semibold text-gray-900">
-                            Belum Ada Artikel Terbaru
+                    <div className="flex flex-col items-center justify-center py-24 bg-white rounded-xl border-2 border-dashed border-slate-200 text-center">
+                        <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-6">
+                            <FileText className="h-8 w-8 text-slate-400" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-slate-900">
+                            Belum Ada Berita Terbaru
                         </h3>
-                        <p className="mt-3 text-gray-600 max-w-md mx-auto">
-                            Kami sedang mempersiapkan informasi dan berita terbaru untuk Anda.
-                            Silakan kunjungi kembali halaman ini untuk update terkini.
+                        <p className="mt-2 text-slate-500 max-w-md mx-auto leading-relaxed">
+                            Tim kami sedang menyiapkan informasi terkini untuk Anda.
+                            Silakan kunjungi kembali halaman ini dalam waktu dekat.
                         </p>
                     </div>
                 )}
 
-                {hasArticles && (
-                    <div className="mt-12 text-center">
-                        <Button
-                            asChild
-                            size="lg"
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium"
-                        >
-                            <Link href={route('articles.public.index')} className="flex items-center gap-2">
-                                Lihat Semua Artikel
-                                <ArrowRight className="h-4 w-4" />
-                            </Link>
-                        </Button>
-                    </div>
-                )}
+                <div className="mt-12 text-center md:hidden">
+                    <Button
+                        asChild
+                        size="lg"
+                        variant="outline"
+                        className="w-full border-slate-300 text-slate-700 hover:text-blue-700 hover:border-blue-300"
+                    >
+                        <Link href={route('articles.public.index')}>
+                            Lihat Semua Berita
+                        </Link>
+                    </Button>
+                </div>
             </div>
         </section>
     )

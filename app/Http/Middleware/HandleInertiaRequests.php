@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -35,9 +37,19 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
-            //
-        ];
+        return array_merge(parent::share($request), [
+            'auth' => [
+                'user' => $request->user(),
+            ],
+            'navbar' => [
+                'featured_articles' => Cache::remember('navbar_articles', 60, function () {
+                    return Article::published()
+                        ->latest()
+                        ->take(2)
+                        ->select('id', 'title', 'slug', 'image', 'published_at') // Select only what you need
+                        ->get();
+                }),
+            ],
+        ]);
     }
 }

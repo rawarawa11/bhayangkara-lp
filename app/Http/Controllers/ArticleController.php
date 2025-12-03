@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
@@ -19,28 +20,34 @@ use Illuminate\Support\Facades\Cookie;
 
 class ArticleController extends Controller
 {
-    public function PublicIndex(Request $request) {
-        $q = trim((string) $request->get('q',''));
-        $sort = $request->get('sort','published_at_desc');
+    public function publicIndex(Request $request)
+    {
+        $q = trim((string) $request->get('q'));
+        $sort = $request->get('sort', 'published_at_desc');
 
-        $articles = Article::query()
-            ->published()
-            ->when($q !== '', function ($qBuilder) use ($q) {
-                $qBuilder->where(function ($x) use ($q) {
-                    $x->where('title', 'LIKE', '%' . $q . '%')
-                        ->orWhere('tags', 'LIKE', '%' . $q . '%')
-                        ->orWhere('body', 'LIKE', '%' . $q . '%');
+        $query = Article::published()
+            ->with('user:id,name')
+            ->when($q, function (Builder $qb, $search) {
+                $qb->where(function ($sub) use ($search) {
+                    $sub->where('title', 'like', "%{$search}%")
+                        ->orWhere('body', 'like', "%{$search}%")
+                        ->orWhere('tags', 'like', "%{$search}%");
                 });
-            })
-            ->when($sort === 'published_at_desc', fn ($qb) => $qb->orderBy('published_at', 'desc') )
-            ->when($sort === 'published_at_asc', fn ($qb) => $qb->orderBy('published_at', 'asc') )
-            ->when($sort === 'title_asc', fn ($qb) => $qb->orderBy('title', 'asc'))
-            ->when($sort === 'title_desc', fn ($qb) => $qb->orderBy('title', 'desc'))
-            ->paginate(12)
-            ->withQueryString();
+            });
 
-        return Inertia::render('Articles/Index', ['articles' => $articles, 'filters' => compact('q','sort')]);
-//        return response()->json($articles);
+        $query = match ($sort) {
+            'published_at_asc' => $query->orderBy('published_at', 'asc'),
+            'title_asc'        => $query->orderBy('title', 'asc'),
+            'title_desc'       => $query->orderBy('title', 'desc'),
+            default            => $query->orderBy('published_at', 'desc'),
+        };
+
+        $articles = $query->paginate(12)->withQueryString();
+
+        return Inertia::render('Articles/PublicIndex', [
+            'articles' => $articles,
+            'filters' => compact('q', 'sort'),
+        ]);
     }
 
     public function publicShow(string $slug)

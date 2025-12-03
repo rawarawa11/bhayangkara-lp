@@ -13,7 +13,6 @@ use App\Http\Middleware\TrackVisitor;
 
 Route::get('/', function () {
     $latest_articles = Article::published()->latest()->take(3)->get();
-
     return Inertia::render('Welcome', [
         'articles' => $latest_articles
     ]);
@@ -57,3 +56,4 @@ Route::middleware(['auth','role:admin'])->group(function () {
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/artikel', [ArticleController::class, 'PublicIndex'])->name('articles.public.index');
 Route::get('/artikel/{slug}', [ArticleController::class, 'publicShow'])->name('articles.public.show');
+
