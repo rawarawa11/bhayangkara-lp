@@ -1,8 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link, router } from '@inertiajs/react'
 import { route } from 'ziggy-js'
-import dayjs from 'dayjs'
-import { Button } from '@/components/ui/button'
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table'
@@ -14,14 +12,7 @@ import {
 } from '@/components/ui/pagination'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import {
-    MoreHorizontal,
-    Pencil,
-    Trash2,
-    FileText,
-    PlusCircle,
-    Loader2
-} from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
     Dialog,
     DialogTrigger,
@@ -32,17 +23,27 @@ import {
     DialogFooter,
     DialogClose,
 } from "@/components/ui/dialog"
+import {
+    MoreHorizontal,
+    Pencil,
+    Trash2,
+    PlusCircle,
+    Pill,
+    Loader2,
+    ToggleLeft,
+    ToggleRight
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Article, PaginatedLink, PaginatedResponse } from '@/types'
+import { Medicine, PaginatedResponse, PaginatedLink } from '@/types'
 
 type Props = {
-    articles: PaginatedResponse<Article>;
+    medicines: PaginatedResponse<Medicine>;
     q?: string;
 }
 
-const imgUrl = (path: string | null) => (path ? `/storage/${path}` : 'https://placehold.co/100x100/f1f5f9/94a3b8?text=IMG')
+const imgUrl = (path: string | null) => path ? `/storage/${path}` : 'https://placehold.co/100x100/f1f5f9/94a3b8?text=IMG'
 
-function ArticlePagination({ links }: { links: PaginatedLink[] }) {
+function MedicinePagination({ links }: { links: PaginatedLink[] }) {
     const mappedLinks = useMemo(() => {
         return links.map((l) => ({
             ...l,
@@ -53,20 +54,14 @@ function ArticlePagination({ links }: { links: PaginatedLink[] }) {
     }, [links])
 
     return (
-        <Pagination className="mt-0">
+        <Pagination className="mt-4">
             <PaginationContent>
                 {mappedLinks.map((l, i) => {
                     if (l.isEllipsis) return <PaginationItem key={`e-${i}`}><PaginationEllipsis /></PaginationItem>
                     if (l.isPrev) return <PaginationItem key={`p-${i}`}><PaginationPrevious href={l.url || '#'} className={!l.url ? 'pointer-events-none opacity-50' : ''} /></PaginationItem>
                     if (l.isNext) return <PaginationItem key={`n-${i}`}><PaginationNext href={l.url || '#'} className={!l.url ? 'pointer-events-none opacity-50' : ''} /></PaginationItem>
                     return <PaginationItem key={`l-${i}`}>
-                        <PaginationLink
-                            href={l.url || '#'}
-                            isActive={l.active}
-                            className={l.active ? "bg-blue-600 text-white hover:bg-blue-700 hover:text-white" : ""}
-                        >
-                            <span dangerouslySetInnerHTML={{ __html: l.label }} />
-                        </PaginationLink>
+                        <PaginationLink href={l.url || '#'} isActive={l.active} dangerouslySetInnerHTML={{ __html: l.label }} />
                     </PaginationItem>
                 })}
             </PaginationContent>
@@ -77,30 +72,30 @@ function ArticlePagination({ links }: { links: PaginatedLink[] }) {
 function EmptyState({ q }: { q?: string }) {
     return (
         <div className="py-16 text-center text-muted-foreground">
-            <FileText className="mx-auto h-16 w-16 text-slate-300" />
+            <Pill className="mx-auto h-16 w-16 text-slate-300" />
             <h3 className="mt-4 text-lg font-semibold">
-                {q ? `Tidak ada hasil untuk "${q}"` : 'Belum ada artikel'}
+                {q ? `Tidak ada hasil untuk "${q}"` : 'Belum ada obat'}
             </h3>
             <p className="mt-2 text-sm text-slate-500">
-                {q ? 'Coba kata kunci lain untuk mencari.' : 'Mulai dengan membuat artikel baru.'}
+                {q ? 'Coba kata kunci lain untuk mencari.' : 'Mulai dengan menambahkan obat baru ke inventaris.'}
             </p>
-            <Button asChild className="mt-6 bg-blue-600 hover:bg-blue-700 shadow-sm">
-                <Link href={route('articles.create')}>
+            <Button asChild className="mt-6 bg-blue-600 hover:bg-blue-700">
+                <Link href={route('medicines.create')}>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Buat Artikel Baru
+                    Tambah Obat
                 </Link>
             </Button>
         </div>
     )
 }
 
-export function DeleteArticleDialog({ article, children }: { article: Article, children: React.ReactNode }) {
+export function DeleteMedicineDialog({ medicine, children }: { medicine: Medicine, children: React.ReactNode }) {
     const [open, setOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
 
     const handleDelete = () => {
         setIsDeleting(true)
-        router.delete(route("articles.destroy", article.id), {
+        router.delete(route("medicines.destroy", medicine.id), {
             preserveScroll: true,
             onSuccess: () => {
                 setOpen(false)
@@ -117,9 +112,9 @@ export function DeleteArticleDialog({ article, children }: { article: Article, c
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Hapus Artikel?</DialogTitle>
+                    <DialogTitle>Hapus Obat?</DialogTitle>
                     <DialogDescription>
-                        Artikel <span className="font-semibold">"{article.title}"</span> akan dihapus secara permanen.
+                        Obat <span className="font-semibold">"{medicine.name}"</span> akan dihapus secara permanen dari inventaris.
                         Tindakan ini tidak dapat dibatalkan.
                     </DialogDescription>
                 </DialogHeader>
@@ -142,41 +137,42 @@ export function DeleteArticleDialog({ article, children }: { article: Article, c
     )
 }
 
-export function ArticleTable({ articles, q }: Props) {
-    const links = articles.links || articles.meta?.links || [];
+export function MedicineTable({ medicines, q }: Props) {
 
-    if (articles.data.length === 0) {
+    const toggleAvailability = (medicine: Medicine) => {
+        router.patch(route('medicines.toggle-availability', medicine.id), {}, { preserveScroll: true })
+    }
+
+    if (medicines.data.length === 0) {
         return <EmptyState q={q} />
     }
 
     return (
-        <div className="space-y-0">
+        <div className="space-y-4">
             <div className="rounded-md border border-slate-200">
                 <Table>
                     <TableHeader className="bg-slate-50">
                         <TableRow>
                             <TableHead className="w-[80px] pl-6">Gambar</TableHead>
-                            <TableHead>Informasi Artikel</TableHead>
+                            <TableHead>Informasi Obat</TableHead>
                             <TableHead className="w-[150px]">Status</TableHead>
-                            <TableHead className="w-[150px]">Dipublikasikan</TableHead>
                             <TableHead className="w-[80px] text-right pr-6">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {articles.data.map((article) => (
-                            <TableRow key={article.id} className="hover:bg-slate-50/50 transition-colors">
+                        {medicines.data.map((medicine) => (
+                            <TableRow key={medicine.id} className="hover:bg-slate-50/50 transition-colors">
                                 <TableCell className="pl-6">
                                     <Avatar className="h-12 w-12 rounded-lg border border-slate-200">
-                                        <AvatarImage src={imgUrl(article.image)} className="object-cover" />
+                                        <AvatarImage src={imgUrl(medicine.image)} alt={medicine.name} className="object-cover" />
                                         <AvatarFallback className="rounded-lg bg-slate-100 text-slate-400">IMG</AvatarFallback>
                                     </Avatar>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col">
-                                        <span className="font-semibold text-slate-900 line-clamp-1">{article.title}</span>
+                                        <span className="font-semibold text-slate-900">{medicine.name}</span>
                                         <span className="text-xs text-slate-500 line-clamp-1 max-w-[400px]">
-                                            {/* Using slug as description fallback, or extract excerpt if available */}
-                                            {article.slug}
+                                            {medicine.description || '-'}
                                         </span>
                                     </div>
                                 </TableCell>
@@ -185,18 +181,13 @@ export function ArticleTable({ articles, q }: Props) {
                                         variant="outline"
                                         className={cn(
                                             "px-2.5 py-0.5 rounded-full text-xs font-medium border",
-                                            article.status === 'published'
+                                            medicine.is_available
                                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                                 : "bg-slate-100 text-slate-600 border-slate-200"
                                         )}
                                     >
-                                        {article.status === 'published' ? 'Diterbitkan' : 'Draft'}
+                                        {medicine.is_available ? 'Tersedia' : 'Tidak Tersedia'}
                                     </Badge>
-                                </TableCell>
-                                <TableCell className="text-sm text-slate-600">
-                                    {article.published_at
-                                        ? dayjs(article.published_at).format('DD MMM YYYY')
-                                        : <span className="text-slate-400 italic">Belum terbit</span>}
                                 </TableCell>
                                 <TableCell className="text-right pr-6">
                                     <DropdownMenu>
@@ -208,21 +199,34 @@ export function ArticleTable({ articles, q }: Props) {
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-48">
                                             <DropdownMenuItem asChild>
-                                                <Link href={route('articles.edit', article.id)} className="cursor-pointer">
-                                                    <Pencil className="mr-2 h-4 w-4" /> Edit Artikel
+                                                <Link href={route('medicines.edit', medicine.id)} className="cursor-pointer">
+                                                    <Pencil className="mr-2 h-4 w-4" /> Edit Detail
                                                 </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => toggleAvailability(medicine)} className="cursor-pointer">
+                                                {medicine.is_available ? (
+                                                    <>
+                                                        <ToggleLeft className="mr-2 h-4 w-4 text-slate-500" />
+                                                        Set Tidak Tersedia
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ToggleRight className="mr-2 h-4 w-4 text-emerald-600" />
+                                                        Set Tersedia
+                                                    </>
+                                                )}
                                             </DropdownMenuItem>
 
                                             <DropdownMenuSeparator />
 
-                                            <DeleteArticleDialog article={article}>
+                                            <DeleteMedicineDialog medicine={medicine}>
                                                 <DropdownMenuItem
                                                     onSelect={(e) => e.preventDefault()}
                                                     className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
                                                 >
                                                     <Trash2 className="mr-2 h-4 w-4" /> Hapus
                                                 </DropdownMenuItem>
-                                            </DeleteArticleDialog>
+                                            </DeleteMedicineDialog>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
@@ -231,10 +235,7 @@ export function ArticleTable({ articles, q }: Props) {
                     </TableBody>
                 </Table>
             </div>
-
-            <div className="border-t border-slate-100 p-4">
-                <ArticlePagination links={links} />
-            </div>
+            <MedicinePagination links={medicines.links} />
         </div>
     )
 }

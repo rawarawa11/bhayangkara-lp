@@ -36,6 +36,15 @@ export type InertiaPaginatedResponse<T> = {
     };
 }
 
+export type PaginatedResponse<T> = {
+    data: T[];
+    links: PaginatedLink[];
+    current_page: number;
+    last_page: number;
+    total: number;
+    meta?: { links: PaginatedLink[]; total: number };
+}
+
 export type ArticleSummary = {
     id: number;
     title: string;
@@ -46,6 +55,7 @@ export type ArticleSummary = {
 }
 
 export type User = {
+    profile_photo_url: string | React.DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_IMG_SRC_TYPES[keyof React.DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_IMG_SRC_TYPES] | undefined;
     id: number;
     name: string;
     email: string;
@@ -65,4 +75,14 @@ export type Medicine = {
     is_available: boolean;
     created_at: string;
     updated_at: string;
+}
+
+export type Schedule = {
+    id: number;
+    doctor_name: string;
+    specialist: string;
+    day: string;
+    time_start: string;
+    time_end: string;
+    is_available: boolean;
 }

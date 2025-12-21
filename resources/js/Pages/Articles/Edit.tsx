@@ -13,8 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, CalendarIcon, Loader2, UploadCloud } from 'lucide-react'
-
+import { ArrowLeft, CalendarIcon, Loader2, UploadCloud, Save, Image as ImageIcon, FileText, Hash, Globe } from 'lucide-react'
+import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
 
 interface ArticleEditFormData {
     title: string;
@@ -26,12 +26,14 @@ interface ArticleEditFormData {
     meta_keywords: string;
     status: 'draft' | 'published';
     published_at: Date | null;
-    _method: 'PUT'; // Wajib untuk spoofing method
+    _method: 'PUT';
 }
 
 type Props = {
     article: Article;
 }
+
+// Helper to get full image URL
 const imgUrl = (path: string | null) => (path ? `/storage/${path}` : null)
 
 function DatePicker({ value, onChange, disabled }: { value: Date | null, onChange: (date: Date | undefined) => void, disabled?: boolean }) {
@@ -50,7 +52,7 @@ function DatePicker({ value, onChange, disabled }: { value: Date | null, onChang
                     {value ? dayjs(value).format('DD MMMM YYYY') : <span>Pilih tanggal</span>}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                     mode="single"
                     selected={value ?? undefined}
@@ -80,29 +82,24 @@ export default function ArticleEdit() {
         _method: 'PUT',
     });
 
-    // Transformasi data sebelum dikirim
     transform((formData) => ({
         ...formData,
         tags: tagsInput.split(',').map(tag => tag.trim()).filter(Boolean),
         published_at: formData.published_at ? dayjs(formData.published_at).format('YYYY-MM-DD HH:mm:ss') : null,
     }));
 
-    // Handler untuk pengiriman form (menggunakan POST karena ada file, tapi _method akan mengarahkannya ke UPDATE)
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Gunakan 'post' karena Inertia memerlukan 'post' untuk unggahan file (multipart/form-data)
-        // Laravel akan membacanya sebagai PUT karena ada `_method: 'PUT'` di dalam data.
-        post(route('admin.articles.update', article.id), {
-            forceFormData: true, // Pastikan inertia mengirim sebagai FormData
+        post(route('articles.update', article.id), {
+            forceFormData: true,
         });
     };
 
-    // Handler untuk perubahan gambar
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            setData('image', file); // Set file baru
-            setImagePreview(URL.createObjectURL(file)); // Set preview baru
+            setData('image', file);
+            setImagePreview(URL.createObjectURL(file));
         }
     };
 
@@ -110,159 +107,78 @@ export default function ArticleEdit() {
         <AdminLayout title={`Edit: ${article.title}`}>
             <Head title={`Edit: ${article.title}`} />
 
-            <form onSubmit={submit}>
-                <div className="container mx-auto p-4 md:p-6">
-                    <div className="flex items-center justify-between gap-4 mb-6">
-                        <div className="flex items-center gap-4">
-                            <Link
-                                href={route('articles.index')}
-                                className={cn(buttonVariants({ variant: 'outline', size: 'icon' }))}
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Link>
-                            <h1 className="text-2xl font-semibold truncate">
-                                Edit Artikel: <span className="text-muted-foreground">{article.title}</span>
+            <form onSubmit={submit} className="flex flex-col min-h-[calc(100vh-4rem)]">
+                <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-white/80 px-6 py-4 backdrop-blur-sm">
+                    <div className="flex items-center gap-4">
+                        <Link
+                            href={route('articles.index')}
+                            className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), "text-slate-500")}
+                        >
+                            <ArrowLeft className="h-5 w-5" />
+                        </Link>
+                        <div className="flex flex-col">
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900 line-clamp-1">
+                                Edit Artikel
                             </h1>
+                            <p className="text-xs text-slate-500 line-clamp-1 max-w-md">
+                                {article.title}
+                            </p>
                         </div>
-                        <Button type="submit" disabled={processing}>
-                            {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Update Artikel
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" type="button" asChild>
+                            <Link href={route('articles.index')}>Batal</Link>
+                        </Button>
+                        <Button type="submit" disabled={processing} className="bg-blue-600 hover:bg-blue-700 min-w-[140px]">
+                            {processing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Simpan Perubahan
                         </Button>
                     </div>
+                </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="flex-1 bg-slate-50/50 p-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         <div className="lg:col-span-2 space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Konten Utama</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="title">Judul Artikel</Label>
-                                        <Input
-                                            id="title"
-                                            value={data.title}
-                                            onChange={(e) => setData('title', e.target.value)}
-                                            placeholder="Judul yang menarik..."
-                                            autoFocus
-                                        />
-                                        {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
+                            <Card className="border-slate-200 shadow-none overflow-hidden">
+                                <CardContent className="p-0">
+                                    <div className="p-6 border-b border-slate-100">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="title" className="text-slate-600 font-semibold">Judul Artikel</Label>
+                                            <Input
+                                                id="title"
+                                                value={data.title}
+                                                onChange={(e) => setData('title', e.target.value)}
+                                                placeholder="Judul artikel..."
+                                                className="text-lg font-medium border-slate-200 focus-visible:ring-blue-500 h-12"
+                                            />
+                                            {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="body">Isi (Body)</Label>
-                                        <Textarea
-                                            id="body"
+                                    <div className="bg-white min-h-[500px]">
+                                        <SimpleEditor
                                             value={data.body}
-                                            onChange={(e) => setData('body', e.target.value)}
-                                            placeholder="Tulis isi artikel Anda di sini..."
-                                            rows={15}
+                                            onChange={(val) => setData('body', val)}
                                         />
-                                        {errors.body && <p className="text-sm text-red-500">{errors.body}</p>}
                                     </div>
+                                    {errors.body && <div className="px-6 pb-4 text-sm text-red-500">{errors.body}</div>}
                                 </CardContent>
                             </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Gambar Utama (Featured Image)</CardTitle>
-                                    <CardDescription>
-                                        Unggah gambar baru untuk mengganti gambar yang lama.
-                                    </CardDescription>
+                            <Card className="border-slate-200 shadow-none">
+                                <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                        <Globe className="h-4 w-4 text-slate-500" />
+                                        Konfigurasi SEO
+                                    </CardTitle>
+                                    <CardDescription>Update metadata untuk mesin pencari.</CardDescription>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="w-full">
-                                        {imagePreview ? (
-                                            <div className="mb-4">
-                                                <img src={imagePreview} alt="Preview" className="w-full max-h-64 object-contain rounded-md border" />
-                                            </div>
-                                        ) : (
-                                            <div className="mb-4 flex items-center justify-center h-48 w-full rounded-md border-2 border-dashed">
-                                                <UploadCloud className="h-10 w-10 text-muted-foreground" />
-                                            </div>
-                                        )}
-                                        <Input
-                                            id="image"
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleImageChange}
-                                        />
-                                        <p className="text-xs text-muted-foreground mt-2">
-                                            Kosongkan jika Anda tidak ingin mengubah gambar utama.
-                                        </p>
-                                        {errors.image && <p className="mt-2 text-sm text-red-500">{errors.image}</p>}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        {/* Kolom Samping (Kanan) */}
-                        <div className="lg:col-span-1 space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Publikasi</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="status">Status</Label>
-                                        <Select
-                                            value={data.status}
-                                            onValueChange={(value: 'draft' | 'published') => setData('status', value)}
-                                        >
-                                            <SelectTrigger id="status">
-                                                <SelectValue placeholder="Pilih status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="draft">Draft</SelectItem>
-                                                <SelectItem value="published">Diterbitkan (Published)</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="published_at">Tanggal Publikasi</Label>
-                                        <DatePicker
-                                            value={data.published_at}
-                                            onChange={(date) => setData('published_at', date ?? null)}
-                                            disabled={data.status === 'draft'}
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            {data.status === 'draft' ? 'Atur status ke "Diterbitkan" untuk memilih tanggal.' : 'Kosongkan untuk langsung terbit.'}
-                                        </p>
-                                        {errors.published_at && <p className="text-sm text-red-500">{errors.published_at}</p>}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Tag</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        <Input
-                                            id="tags"
-                                            value={tagsInput}
-                                            onChange={(e) => setTagsInput(e.target.value)}
-                                            placeholder="teknologi, kesehatan, ..."
-                                        />
-                                        <p className="text-xs text-muted-foreground">Pisahkan setiap tag dengan koma (,).</p>
-                                        {errors.tags && <p className="text-sm text-red-500">{errors.tags}</p>}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>SEO Meta Data</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-4 p-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="meta_title">Meta Title</Label>
                                         <Input
                                             id="meta_title"
                                             value={data.meta_title}
                                             onChange={(e) => setData('meta_title', e.target.value)}
-                                            placeholder="Judul untuk mesin pencari..."
+                                            placeholder="Judul di Google Search"
                                         />
                                         {errors.meta_title && <p className="text-sm text-red-500">{errors.meta_title}</p>}
                                     </div>
@@ -272,20 +188,114 @@ export default function ArticleEdit() {
                                             id="meta_description"
                                             value={data.meta_description}
                                             onChange={(e) => setData('meta_description', e.target.value)}
-                                            placeholder="Deskripsi singkat untuk mesin pencari..."
-                                            rows={4}
+                                            placeholder="Deskripsi singkat..."
+                                            rows={3}
+                                            className="resize-none"
                                         />
                                         {errors.meta_description && <p className="text-sm text-red-500">{errors.meta_description}</p>}
                                     </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        <div className="lg:col-span-1 space-y-6">
+                            <Card className="border-slate-200 shadow-none">
+                                <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                        <FileText className="h-4 w-4 text-slate-500" />
+                                        Publikasi
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="px-6 space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="meta_keywords">Meta Keywords</Label>
-                                        <Input
-                                            id="meta_keywords"
-                                            value={data.meta_keywords}
-                                            onChange={(e) => setData('meta_keywords', e.target.value)}
-                                            placeholder="kata, kunci, dipisah, koma"
+                                        <Label htmlFor="status">Status</Label>
+                                        <Select
+                                            value={data.status}
+                                            onValueChange={(value: 'draft' | 'published') => setData('status', value)}
+                                        >
+                                            <SelectTrigger id="status" className="bg-white">
+                                                <SelectValue placeholder="Pilih status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="draft">
+                                                    <span className="flex items-center gap-2">
+                                                        <span className="h-2 w-2 rounded-full bg-slate-400" /> Draft
+                                                    </span>
+                                                </SelectItem>
+                                                <SelectItem value="published">
+                                                    <span className="flex items-center gap-2">
+                                                        <span className="h-2 w-2 rounded-full bg-emerald-500" /> Published
+                                                    </span>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="published_at">Tanggal Publikasi</Label>
+                                        <DatePicker
+                                            value={data.published_at}
+                                            onChange={(date) => setData('published_at', date ?? null)}
+                                            disabled={data.status === 'draft'}
                                         />
-                                        {errors.meta_keywords && <p className="text-sm text-red-500">{errors.meta_keywords}</p>}
+                                        {errors.published_at && <p className="text-sm text-red-500">{errors.published_at}</p>}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="border-slate-200 shadow-none">
+                                <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                        <Hash className="h-4 w-4 text-slate-500" />
+                                        Topik & Tag
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="px-6 space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="tags">Tags</Label>
+                                        <Input
+                                            id="tags"
+                                            value={tagsInput}
+                                            onChange={(e) => setTagsInput(e.target.value)}
+                                            placeholder="Kesehatan, Berita, dll..."
+                                        />
+                                        <p className="text-[10px] text-slate-500">Pisahkan dengan koma.</p>
+                                        {errors.tags && <p className="text-sm text-red-500">{errors.tags}</p>}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="border-slate-200 shadow-none">
+                                <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                        <ImageIcon className="h-4 w-4 text-slate-500" />
+                                        Gambar Utama
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="px-6">
+                                    <div className="w-full">
+                                        <label
+                                            htmlFor="image"
+                                            className="cursor-pointer group relative flex flex-col items-center justify-center w-full h-48 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors overflow-hidden"
+                                        >
+                                            {imagePreview ? (
+                                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                    <div className="p-3 bg-white rounded-full shadow-none mb-3">
+                                                        <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                                    </div>
+                                                    <p className="mb-1 text-sm text-slate-500 font-medium">Klik untuk ganti gambar</p>
+                                                    <p className="text-xs text-slate-400">PNG, JPG (Max. 2MB)</p>
+                                                </div>
+                                            )}
+                                            <Input
+                                                id="image"
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleImageChange}
+                                            />
+                                        </label>
+                                        {errors.image && <p className="mt-2 text-sm text-red-500">{errors.image}</p>}
                                     </div>
                                 </CardContent>
                             </Card>

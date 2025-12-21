@@ -19,7 +19,7 @@ class ChatbotController extends Controller
         ]);
 
         $userQuestion = $validated['message'];
-        $context = null; // We will try to find this
+        $context = null;
 
         try {
             $apiKey = env('GEMINI_API_KEY');
@@ -89,13 +89,11 @@ class ChatbotController extends Controller
     private function buildFinalPrompt(string $systemPrompt, string $userQuestion, ?string $context): string
     {
         if ($context) {
-            // RAG format
             return $systemPrompt . "\n\n" .
                 "--- KONTEKS (GUNAKAN INI) ---:\n" . $context . "\n\n" .
                 "--- PERTANYAAN PENGGUNA ---:\n" . $userQuestion . "\n\n" .
                 "--- JAWABAN (HANYA DARI KONTEKS) ---:\n";
         } else {
-            // General chat format
             return $systemPrompt . "\n\n" .
                 "--- PERTANYAAN PENGGUNA ---:\n" . $userQuestion . "\n\n" .
                 "--- JAWABAN ---:\n";

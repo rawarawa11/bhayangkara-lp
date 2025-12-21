@@ -32,7 +32,7 @@ export default function ArticlesSection({ articles }: { articles: ArticleSummary
     const hasArticles = articles && articles.length > 0
 
     return (
-        <section className="bg-slate-50 py-20 lg:py-28">
+        <section className="bg-slate-50 py-20 lg:py-28 border-t border-slate-200">
             <div className="container mx-auto max-w-7xl px-4 sm:px-6">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                     <div className="max-w-2xl">
@@ -67,20 +67,16 @@ export default function ArticlesSection({ articles }: { articles: ArticleSummary
                                 key={article.id}
                                 className="group flex flex-col bg-white border border-slate-200 rounded-lg overflow-hidden hover:border-blue-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                             >
-                                {/* Full Bleed Image (Rigid, No Padding) */}
                                 <Link href={route('articles.public.show', article.slug)} className="block aspect-[16/9] overflow-hidden relative bg-slate-100">
                                     <img
                                         src={getImageUrl(article.image)}
                                         alt={article.title}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
-                                    {/* Optional Overlay on Hover */}
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                                 </Link>
 
-                                {/* Content with Padding */}
                                 <div className="flex flex-col flex-grow p-6">
-                                    {/* Date & Meta */}
                                     <div className="flex items-center justify-between gap-2 mb-3 text-xs text-slate-500 font-medium">
                                         <span className="flex items-center gap-1.5 text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">
                                             <CalendarDays className="h-3.5 w-3.5" />

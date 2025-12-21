@@ -95,7 +95,7 @@ export default function Navbar() {
                         <div className="h-9 w-[1px] bg-slate-200"></div>
 
                         <img
-                            src="/images/logo-rs.png"
+                            src="/images/logo-rs.webp"
                             alt="Logo RS Bhayangkara"
                             className="h-11 w-auto object-contain drop-shadow-sm transition-transform group-hover:scale-105"
                             onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/transparent/png?text=RS'; }}

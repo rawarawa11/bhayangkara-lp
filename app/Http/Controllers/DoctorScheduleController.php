@@ -5,17 +5,58 @@ namespace App\Http\Controllers;
 use App\Models\DoctorSchedule;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DoctorScheduleController extends Controller
 {
-    public function index()
+    public function publicList(): Response
     {
-        $schedules = DoctorSchedule::orderByRaw("FIELD(day, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu')")
+        $schedules = DoctorSchedule::where('is_available', true)
             ->orderBy('time_start')
-            ->paginate(20);
+            ->get();
+
+        return Inertia::render('DoctorSchedules/PublicIndex', [
+            'schedules' => $schedules
+        ]);
+    }
+
+    public function index(Request $request)
+    {
+        $is_available = $request->get('is_available', 'all');
+        $q = trim((string) $request->get('q', ''));
+        // $sort = $request->get('sort', 'updated_desc');
+
+        $query = DoctorSchedule::query()
+            ->when($q, function ($query, $q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('doctor_name', 'like', "%{$q}%")
+                        ->orWhere('specialist', 'like', "%{$q}%")
+                        ->orWhere('day', 'like', "%{$q}%");
+                });
+            })
+            ->when($is_available !== 'all', function ($query) use ($is_available) {
+                $query->where('is_available', $is_available === 'available');
+            });
+
+        $schedules = $query->orderByRaw("CASE day
+                WHEN 'Senin' THEN 1
+                WHEN 'Selasa' THEN 2
+                WHEN 'Rabu' THEN 3
+                WHEN 'Kamis' THEN 4
+                WHEN 'Jumat' THEN 5
+                WHEN 'Sabtu' THEN 6
+                WHEN 'Minggu' THEN 7
+                ELSE 8 END")
+            ->orderBy('time_start')
+            ->paginate(20)
+            ->withQueryString();
 
         return Inertia::render('DoctorSchedules/Index', [
-            'schedules' => $schedules
+            'schedules' => $schedules,
+            'filters' => [
+                'q' => $q,
+                'is_available' => $is_available
+            ],
         ]);
     }
 
@@ -37,7 +78,7 @@ class DoctorScheduleController extends Controller
 
         DoctorSchedule::create($data);
 
-        return redirect()->route('admin.schedules.index')
+        return redirect()->route('schedules.index')
             ->with('success', 'Jadwal dokter berhasil ditambahkan.');
     }
 
@@ -61,7 +102,7 @@ class DoctorScheduleController extends Controller
 
         $schedule->update($data);
 
-        return redirect()->route('admin.schedules.index')
+        return redirect()->route('schedules.index')
             ->with('success', 'Jadwal dokter berhasil diperbarui.');
     }
 
@@ -69,7 +110,7 @@ class DoctorScheduleController extends Controller
     {
         $schedule->delete();
 
-        return redirect()->route('admin.schedules.index')
+        return redirect()->route('schedules.index')
             ->with('success', 'Jadwal dokter berhasil dihapus.');
     }
 }

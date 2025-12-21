@@ -8,7 +8,7 @@ import {
     BookOpen,
     Hospital,
     Settings,
-    LifeBuoy
+    Activity,
 } from 'lucide-react'
 
 import {
@@ -26,7 +26,6 @@ import {
     SidebarSeparator,
 } from '@/components/ui/sidebar'
 
-// Pengaturan Menu NAvigasi
 const navMain = [
     {
         title: "Dashboard",
@@ -38,47 +37,52 @@ const navMain = [
 
 const navManagement = [
     {
-        title: "Artikel",
+        title: "Artikel & Berita",
         url: "articles.index",
         icon: Newspaper,
-        isActive: (currentRoute: string) => currentRoute.startsWith('articles'),
+        isActive: (currentRoute: string) => currentRoute.startsWith('articles.'),
     },
     {
         title: "Obat-obatan",
         url: "medicines.index",
         icon: Pill,
-        isActive: (currentRoute: string) => currentRoute.startsWith('medicines'),
+        isActive: (currentRoute: string) => currentRoute.startsWith('medicines.'),
     },
     {
-        title: "Knowledge Base",
+        title: "Knowledge Base (AI)",
         url: "knowledge.index",
         icon: BookOpen,
-        isActive: (currentRoute: string) => currentRoute.startsWith('knowledge'),
+        isActive: (currentRoute: string) => currentRoute.startsWith('knowledge.'),
     },
     {
         title: "Jadwal Dokter",
         url: "schedules.index",
-        icon: LifeBuoy,
-        isActive: (currentRoute: string) => currentRoute.startsWith('schedules'),
-    }
+        icon: Activity,
+        isActive: (currentRoute: string) => currentRoute.startsWith('schedules.'),
+    },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const currentRoute = route().current() as string;
 
     return (
-        <Sidebar collapsible="icon" {...props}>
-            <SidebarHeader>
+        <Sidebar collapsible="icon" {...props} className="bg-slate-900 text-slate-300 border-r border-slate-800 transition-all duration-300">
+            <SidebarHeader className="bg-slate-950 border-b border-slate-800">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton size="lg" asChild className="hover:bg-slate-800 hover:text-white data-[state=open]:bg-slate-800">
                             <Link href={route('dashboard')}>
-                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                                    <Hospital className="size-4" />
-                                </div>
+                                <img
+                                    src="/images/logo-rs.webp"
+                                    alt="Logo Rumah Sakit Bhayangkara"
+                                    className="h-8 w-auto object-contain drop-shadow-sm transition-transform group-hover:scale-105"
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
                                 <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-semibold">RS Bhayangkara</span>
-                                    <span className="truncate text-xs text-muted-foreground">Admin Panel</span>
+                                    <span className="truncate font-bold text-white tracking-wide">RS BHAYANGKARA</span>
+                                    <span className="truncate text-[10px] font-medium text-amber-500 uppercase tracking-widest">
+                                        Admin Panel
+                                    </span>
                                 </div>
                             </Link>
                         </SidebarMenuButton>
@@ -86,10 +90,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
-                {/* Group 1: General */}
+            <SidebarContent className="bg-slate-900 pt-4">
                 <SidebarGroup>
-                    <SidebarGroupLabel>General</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-slate-500 uppercase tracking-widest text-[10px] font-bold">
+                        Utama
+                    </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {navMain.map((item) => (
@@ -98,11 +103,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         asChild
                                         tooltip={item.title}
                                         isActive={item.isActive(currentRoute)}
-                                        className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary hover:bg-accent hover:text-accent-foreground transition-colors"
+                                        className="
+                                            hover:bg-slate-800 hover:text-white text-slate-400
+                                            data-[active=true]:bg-amber-500/10
+                                            data-[active=true]:text-amber-500
+                                            data-[active=true]:border-r-2
+                                            data-[active=true]:border-amber-500
+                                            rounded-r-none border-r-2 border-transparent
+                                            transition-all duration-200
+                                        "
                                     >
                                         <Link href={route(item.url)}>
                                             <item.icon className="size-4" />
-                                            <span>{item.title}</span>
+                                            <span className="font-medium">{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -111,9 +124,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                {/* Group 2: Management */}
                 <SidebarGroup>
-                    <SidebarGroupLabel>Manajemen</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-slate-500 uppercase tracking-widest text-[10px] font-bold mt-4">
+                        Manajemen RS
+                    </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {navManagement.map((item) => (
@@ -122,11 +136,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         asChild
                                         tooltip={item.title}
                                         isActive={item.isActive(currentRoute)}
-                                        className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary hover:bg-accent hover:text-accent-foreground transition-colors"
+                                        className="
+                                            hover:bg-slate-800 hover:text-white text-slate-400
+                                            data-[active=true]:bg-amber-500/10
+                                            data-[active=true]:text-amber-500
+                                            data-[active=true]:border-r-2
+                                            data-[active=true]:border-amber-500
+                                            rounded-r-none border-r-2 border-transparent
+                                            transition-all duration-200
+                                        "
                                     >
                                         <Link href={route(item.url)}>
                                             <item.icon className="size-4" />
-                                            <span>{item.title}</span>
+                                            <span className="font-medium">{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -136,13 +158,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarGroup>
             </SidebarContent>
 
-            <div className="border-t border-gray-200 my-2" />
-
-            <SidebarFooter>
+            <SidebarFooter className="bg-slate-900">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Pengaturan">
-                            <Link href={'#'}>
+                        <div className="
+                            flex items-center gap-3 px-2 py-1.5 rounded-md bg-slate-800 border border-slate-700
+                            transition-all duration-200
+                            group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:border-transparent
+                        ">
+                            <div className="size-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+                            <span className="text-xs text-slate-300 font-medium group-data-[collapsible=icon]:hidden">
+                                Sistem Online
+                            </span>
+                        </div>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild tooltip="Pengaturan" className="text-slate-400 hover:text-white hover:bg-slate-800 mt-1">
+                            <Link href={"#"}>
                                 <Settings className="size-4" />
                                 <span>Pengaturan Akun</span>
                             </Link>

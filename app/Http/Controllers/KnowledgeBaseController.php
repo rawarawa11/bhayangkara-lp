@@ -10,10 +10,21 @@ use Throwable;
 
 class KnowledgeBaseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $q = trim((string) $request->get('q'));
+
+        $notes = KnowledgeBase::query()
+            ->when($q, function ($query, $q) {
+                $query->where('content', 'like', "%{$q}%");
+            })
+            ->select('id', 'content', 'created_at')
+            ->latest()
+            ->get();
+
         return Inertia::render('KnowledgeBase/Index', [
-            'notes' => KnowledgeBase::select('id', 'content', 'created_at')->latest()->get(),
+            'notes' => $notes,
+            'filters' => compact('q'),
         ]);
     }
 

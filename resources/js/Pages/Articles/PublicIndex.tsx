@@ -110,7 +110,7 @@ export default function PublicIndex() {
                 </div>
 
                 <div className="-mt-8 max-w-7xl mx-auto mb-8 relative z-10">
-                    <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-4 md:p-6 flex flex-col md:flex-row items-center gap-4">
+                    <div className="bg-white rounded-xl shadow-md border border-slate-100 p-4 md:p-6 flex flex-col md:flex-row items-center gap-4">
                         <form onSubmit={handleSearch} className="relative w-full flex-grow">
                             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                             <Input
@@ -184,9 +184,20 @@ export default function PublicIndex() {
                         </div>
                     )}
 
+                    <div className="flex items-center justify-between mb-6">
+                        <span className="text-sm font-bold">
+                            <h2 className="text-2xl font-bold text-slate-900">Berita & Artikel Terbaru</h2>
+                            <p className="text-lg font-normal text-slate-500">
+                                Artikel dan informasi terkini dari RS Bhayangkara.
+                            </p>
+                        </span>
+                        <p className="text-sm text-slate-500">
+                            {articles.total} artikel terbaru
+                        </p>
+                    </div>
+
                     {gridArticles.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
                             {gridArticles.map((article) => (
                                 <article
                                     key={article.id}

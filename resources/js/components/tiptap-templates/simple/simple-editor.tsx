@@ -180,7 +180,7 @@ export function SimpleEditor({ value, onChange }: SimpleEditorProps) {
                     <MainToolbarContent />
                 </div>
 
-                <div className="flex-grow m-2 overflow-y-auto bg-background">
+                <div className="flex-grow m-2 px-6 overflow-y-auto bg-background">
                     <EditorContent editor={editor} />
                 </div>
 
