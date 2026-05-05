@@ -94,11 +94,11 @@ export default function HeroSection({ user }: HeroProps) {
                     </div>
 
                     <div className="relative hidden lg:block">
-                        <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200/60 bg-white">
+                        <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200/60 bg-white h-[480px]">
                             <img
-                                src="https://placehold.co/800x1000/f8fafc/cbd5e1?text=Gedung+RS+Bhayangkara"
+                                src="/images/rs-gambar.jpeg"
                                 alt="Fasilitas RS Bhayangkara"
-                                className="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-1000"
+                                className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-1000"
                             />
 
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
