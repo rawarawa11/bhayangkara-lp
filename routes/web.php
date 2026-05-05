@@ -21,15 +21,22 @@ Route::get('/', function () {
         ->take(6)
         ->get();
 
+    $featured_medicines = \App\Models\Medicine::where('is_available', true)
+        ->orderBy('name')
+        ->take(6)
+        ->get();
+
     return Inertia::render('Welcome', [
-        'articles' => $latest_articles,
+        'articles'  => $latest_articles,
         'schedules' => $todays_schedules,
+        'medicines' => $featured_medicines,
     ]);
 })->middleware(TrackVisitor::class)->name('home');
 
 Route::get('/artikel', [ArticleController::class, 'publicIndex'])->name('articles.public.index');
 Route::get('/artikel/{slug}', [ArticleController::class, 'publicShow'])->name('articles.public.show');
 Route::get('/jadwal-dokter', [DoctorScheduleController::class, 'publicList'])->name('schedules.public.list');
+Route::get('/obat-obatan', [MedicineController::class, 'publicIndex'])->name('medicines.public.index');
 
 Route::middleware('guest')->group(function () {
     Route::get('masuk', [AuthController::class, 'showLogin'])->name('login');

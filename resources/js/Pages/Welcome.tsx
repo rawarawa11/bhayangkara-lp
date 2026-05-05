@@ -5,12 +5,13 @@ import HeroSection from '@/components/sections/HeroSection'
 import FeaturedSection from '@/components/sections/FeaturedSection'
 import ArticlesSection from '@/components/sections/ArticleSection'
 import Footer from '@/components/Footer'
-import { ArticleSummary } from '@/types'
+import { ArticleSummary, Medicine } from '@/types'
 import CtaSection from "@/components/sections/CtaSection";
 import ChatWidget from "@/components/ChatWidget";
 import CookieConsent from "@/components/CookiesConsent"
 import FaqSection from "@/components/sections/Faq";
 import DoctorScheduleSection from "@/components/sections/ScheduleSection";
+import MedicineSection from "@/components/sections/MedicineSection";
 
 type User = {
     id: number;
@@ -23,12 +24,14 @@ type WelcomePageProps = PageProps & {
     auth: { user: User | null };
     articles?: ArticleSummary[];
     schedules?: any[];
+    medicines?: Medicine[];
 }
 
 export default function Welcome() {
-    const { auth, articles, schedules } = usePage<WelcomePageProps>().props
+    const { auth, articles, schedules, medicines } = usePage<WelcomePageProps>().props
     const user = auth?.user
     const latestArticles = articles as ArticleSummary[] | undefined
+    const featuredMedicines = (medicines ?? []) as Medicine[]
 
     return (
         <>
@@ -45,6 +48,7 @@ export default function Welcome() {
             <main>
                 <HeroSection user={user} />
                 <FeaturedSection/>
+                <MedicineSection medicines={featuredMedicines} />
                 <DoctorScheduleSection schedules={schedules}/>
                 <ArticlesSection articles={latestArticles ?? []} />
                 <FaqSection/>

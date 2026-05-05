@@ -118,6 +118,7 @@ export default function Footer() {
                         <ul className="space-y-3">
                             <FooterLink href={route('articles.public.index')}>Berita & Artikel</FooterLink>
                             <FooterLink href="/jadwal-dokter">Jadwal Dokter</FooterLink>
+                            <FooterLink href={route('medicines.public.index')}>Ketersediaan Obat</FooterLink>
                             <FooterLink href="/tentang-kami">Profil Rumah Sakit</FooterLink>
                             <FooterLink href="/karir">Karir & Lowongan</FooterLink>
                             <FooterLink href="/pengaduan">Layanan Pengaduan</FooterLink>
