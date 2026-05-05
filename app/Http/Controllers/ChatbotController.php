@@ -32,7 +32,7 @@ class ChatbotController extends Controller
             $allNotes = KnowledgeBase::all();
 
             if (!$allNotes->isEmpty()) {
-                $embeddingResponse = $client->embeddingModel('text-embedding-004')
+                $embeddingResponse = $client->embeddingModel('gemini-embedding-2')
                     ->embedContent($userQuestion);
                 $questionVector = $embeddingResponse->embedding->values;
 
@@ -46,7 +46,7 @@ class ChatbotController extends Controller
             $systemPrompt = $this->createSystemPrompt($context);
 
             $finalPrompt = $this->buildFinalPrompt($systemPrompt, $userQuestion, $context);
-            $response = $client->generativeModel(model: 'gemini-2.0-flash')
+            $response = $client->generativeModel(model: 'gemini-2.5-flash')
                 ->generateContent($finalPrompt);
 
             return response()->json(['reply' => $response->text()]);

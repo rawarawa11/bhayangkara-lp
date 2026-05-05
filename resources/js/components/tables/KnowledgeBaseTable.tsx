@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { router } from '@inertiajs/react'
+import { Link, router } from '@inertiajs/react'
 import { route } from 'ziggy-js'
 import dayjs from 'dayjs'
 import {
@@ -19,7 +19,7 @@ import {
     DialogTrigger
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Trash2, Loader2, BookOpen } from 'lucide-react'
+import { MoreHorizontal, Trash2, Loader2, Brain, PlusCircle, Pencil } from 'lucide-react'
 
 export type Note = {
     id: number;
@@ -33,14 +33,22 @@ type Props = {
 
 function EmptyState() {
     return (
-        <div className="py-16 text-center text-muted-foreground">
-            <BookOpen className="mx-auto h-16 w-16 text-slate-300" />
-            <h3 className="mt-4 text-lg font-semibold">
-                Belum ada pengetahuan
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-4 border border-slate-200">
+                <Brain className="h-8 w-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                Belum ada data pengetahuan
             </h3>
-            <p className="mt-2 text-sm text-slate-500">
-                Mulai dengan menambahkan informasi baru agar chatbot menjadi lebih pintar.
+            <p className="text-sm text-slate-500 max-w-sm leading-relaxed mb-6">
+                Tambahkan informasi agar AI Chatbot dapat menjawab pertanyaan pasien dengan akurat.
             </p>
+            <Button asChild className="bg-blue-600 hover:bg-blue-700 shadow-none">
+                <Link href={route('knowledge.create')}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Tambah Pengetahuan Pertama
+                </Link>
+            </Button>
         </div>
     )
 }
@@ -127,6 +135,14 @@ export function KnowledgeBaseTable({ notes }: Props) {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href={route('knowledge.edit', note.id)}
+                                                className="flex items-center cursor-pointer"
+                                            >
+                                                <Pencil className="mr-2 h-4 w-4" /> Edit
+                                            </Link>
+                                        </DropdownMenuItem>
                                         <DeleteNoteDialog note={note}>
                                             <DropdownMenuItem
                                                 onSelect={(e) => e.preventDefault()}

@@ -33,6 +33,45 @@ class KnowledgeBaseController extends Controller
         return Inertia::render('KnowledgeBase/Create');
     }
 
+    public function edit(KnowledgeBase $knowledge)
+    {
+        return Inertia::render('KnowledgeBase/Edit', [
+            'note' => $knowledge,
+        ]);
+    }
+
+    public function update(Request $request, KnowledgeBase $knowledge)
+    {
+        $data = $request->validate([
+            'content' => 'required|string|min:30',
+        ]);
+
+        $content = $data['content'];
+
+        try {
+            $apiKey = env('GEMINI_API_KEY');
+            if (empty($apiKey)) {
+                throw new \Exception('GEMINI_API_KEY is not set in .env file.');
+            }
+
+            $client = Gemini::client($apiKey);
+
+            $response = $client->embeddingModel('gemini-embedding-2')
+                ->embedContent($content);
+
+            $knowledge->update([
+                'content'   => $content,
+                'embedding' => $response->embedding->values,
+            ]);
+
+        } catch (Throwable $e) {
+            report($e);
+            return back()->withErrors(['api_error' => 'Could not regenerate embedding: ' . $e->getMessage()]);
+        }
+
+        return redirect()->route('knowledge.index')->with('success', 'Knowledge base entry updated.');
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -49,7 +88,7 @@ class KnowledgeBaseController extends Controller
 
             $client = Gemini::client($apiKey);
 
-            $response = $client->embeddingModel('text-embedding-004')
+            $response = $client->embeddingModel('gemini-embedding-2')
                 ->embedContent($content);
 
             $embedding = $response->embedding->values;

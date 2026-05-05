@@ -56,7 +56,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::patch('/medicines/{medicine}/toggle', [MedicineController::class, 'toggleAvailability'])->name('medicines.toggle-availability');
         Route::resource('medicines', MedicineController::class);
         Route::resource('knowledge', KnowledgeBaseController::class)
-            ->only(['index', 'create', 'store', 'destroy']);
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
         Route::resource('schedules', DoctorScheduleController::class);
 
     });
