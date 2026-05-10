@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { Head, Link, router, usePage } from '@inertiajs/react'
 import { route } from 'ziggy-js'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import ChatWidget from '@/components/ChatWidget'
+import GuestLayout from '@/components/layouts/GuestLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -39,7 +37,6 @@ const MedicineCard = ({ medicine }: { medicine: Medicine }) => {
 
     return (
         <div className="group flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-blue-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            {/* Image */}
             <div className="relative aspect-[4/3] bg-slate-50 overflow-hidden">
                 {imgUrl ? (
                     <img
@@ -130,7 +127,7 @@ export default function MedicinePublicIndex() {
     const totalAvailable = medicines.data.filter(m => m.is_available).length
 
     return (
-        <>
+        <GuestLayout>
             <Head>
                 <title>Ketersediaan Obat — RS Bhayangkara Banda Aceh</title>
                 <meta
@@ -139,83 +136,45 @@ export default function MedicinePublicIndex() {
                 />
             </Head>
 
-            <Navbar />
-
-            <main>
-                {/* Hero / Page Header */}
-                <section className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-20 overflow-hidden">
-                    {/* Background decoration */}
-                    <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 rounded-full blur-3xl -translate-y-1/2" />
-                        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-400 rounded-full blur-3xl translate-y-1/2" />
+            <div className="min-h-screen bg-slate-50">
+                <div className="bg-slate-900 text-white pt-20 pb-32">
+                    <div className="container mx-auto max-w-7xl px-4 text-center">
+                        <Badge className="mb-4 bg-blue-600 hover:bg-blue-700 text-white border-none px-3 py-1">
+                            Instalasi Farmasi
+                        </Badge>
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+                            Ketersediaan Obat
+                        </h1>
+                        <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                            Cek stok obat di apotek RS Bhayangkara Banda Aceh secara real-time. Temukan obat yang Anda butuhkan sebelum berkunjung.
+                        </p>
                     </div>
+                </div>
 
-                    <div className="relative container mx-auto max-w-7xl px-4 sm:px-6">
-                        <div className="mb-6">
-                            <Link
-                                href="/"
-                                className="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors text-sm font-medium"
+                <div className="-mt-8 max-w-7xl mx-auto mb-8 relative z-10">
+                    <div className="bg-white rounded-xl shadow-md border border-slate-100 p-4 md:p-6 flex flex-col md:flex-row items-center gap-4">
+                        <div className="relative w-full flex-grow flex gap-3">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                                <Input
+                                    id="search-medicine"
+                                    type="text"
+                                    placeholder="Cari nama obat..."
+                                    value={q}
+                                    onChange={(e) => setQ(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    className="pl-10 h-12 border-slate-200 bg-slate-50 focus:bg-white text-base focus-visible:ring-blue-500"
+                                />
+                            </div>
+                            <Button
+                                onClick={doSearch}
+                                className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-6"
                             >
-                                <ArrowLeft className="h-4 w-4" />
-                                Kembali ke Beranda
-                            </Link>
-                        </div>
-
-                        <div className="max-w-3xl">
-                            <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 rounded-full px-4 py-1.5 mb-6">
-                                <Pill className="h-4 w-4 text-blue-300" />
-                                <span className="text-blue-200 text-sm font-semibold tracking-wide uppercase">Instalasi Farmasi</span>
-                            </div>
-
-                            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight mb-5">
-                                Ketersediaan Obat
-                            </h1>
-                            <p className="text-xl text-blue-100 leading-relaxed mb-8 max-w-2xl">
-                                Cek stok obat di apotek RS Bhayangkara Banda Aceh secara real-time.
-                                Temukan obat yang Anda butuhkan sebelum berkunjung.
-                            </p>
-
-                            {/* Search Bar */}
-                            <div className="flex gap-3 max-w-xl">
-                                <div className="relative flex-1">
-                                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                    <Input
-                                        id="search-medicine"
-                                        type="text"
-                                        placeholder="Cari nama obat..."
-                                        value={q}
-                                        onChange={(e) => setQ(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                        className="pl-10 h-12 bg-white/10 border-white/20 text-white placeholder:text-blue-200/60 focus:border-blue-400 focus:bg-white/15 backdrop-blur-sm rounded-xl"
-                                    />
-                                </div>
-                                <Button
-                                    onClick={doSearch}
-                                    size="lg"
-                                    className="bg-blue-500 hover:bg-blue-400 text-white border-0 h-12 px-6 font-semibold rounded-xl shadow-lg"
-                                >
-                                    Cari
-                                </Button>
-                            </div>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-lg">
-                            <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-4 text-center">
-                                <p className="text-3xl font-extrabold text-white">{medicines.total}</p>
-                                <p className="text-blue-200 text-xs mt-1 font-medium uppercase tracking-wide">Total Obat</p>
-                            </div>
-                            <div className="bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-xl p-4 text-center">
-                                <p className="text-3xl font-extrabold text-emerald-300">{totalAvailable}</p>
-                                <p className="text-emerald-200 text-xs mt-1 font-medium uppercase tracking-wide">Tersedia</p>
-                            </div>
-                            <div className="hidden sm:block bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-4 text-center">
-                                <p className="text-3xl font-extrabold text-white">24<span className="text-lg">J</span></p>
-                                <p className="text-blue-200 text-xs mt-1 font-medium uppercase tracking-wide">Apotek Buka</p>
-                            </div>
+                                Cari
+                            </Button>
                         </div>
                     </div>
-                </section>
+                </div>
 
                 {/* Info Banner */}
                 <div className="bg-blue-50 border-b border-blue-100">
@@ -234,8 +193,7 @@ export default function MedicinePublicIndex() {
                 </div>
 
                 {/* Main Content */}
-                <section className="bg-slate-50 py-12 min-h-[60vh]">
-                    <div className="container mx-auto max-w-7xl px-4 sm:px-6">
+                <div className="container mx-auto max-w-7xl px-4 py-8">
 
                         {/* Search state / results header */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
@@ -284,7 +242,6 @@ export default function MedicinePublicIndex() {
                                     ))}
                                 </div>
 
-                                {/* Pagination */}
                                 {(medicines.last_page > 1) && (
                                     <div className="mt-12 flex items-center justify-center gap-2">
                                         <Button
@@ -322,7 +279,6 @@ export default function MedicinePublicIndex() {
                                 )}
                             </>
                         ) : (
-                            /* Empty state */
                             <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border-2 border-dashed border-slate-200 text-center">
                                 <div className="h-20 w-20 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mb-6">
                                     <Pill className="h-10 w-10 text-slate-300" />
@@ -356,44 +312,8 @@ export default function MedicinePublicIndex() {
                                 )}
                             </div>
                         )}
-                    </div>
-                </section>
-
-                {/* CTA Section */}
-                <section className="bg-slate-900 py-16">
-                    <div className="container mx-auto max-w-7xl px-4 sm:px-6">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                            <div className="text-center md:text-left">
-                                <h2 className="text-2xl font-bold text-white mb-2">
-                                    Butuh Bantuan atau Informasi Lebih Lanjut?
-                                </h2>
-                                <p className="text-slate-400 text-base leading-relaxed max-w-xl">
-                                    Tim apoteker kami siap membantu Anda menemukan obat yang tepat dan memberikan konsultasi kefarmasian.
-                                </p>
-                            </div>
-                            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-                                <a
-                                    href="tel:0651123456"
-                                    className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-lg"
-                                >
-                                    <Phone className="h-4 w-4" />
-                                    (0651) 123-456
-                                </a>
-                                <Link
-                                    href="/"
-                                    className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-lg transition-colors border border-white/20"
-                                >
-                                    <ArrowLeft className="h-4 w-4" />
-                                    Kembali ke Beranda
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
-
-            <Footer />
-            <ChatWidget />
-        </>
+                </div>
+            </div>
+        </GuestLayout>
     )
 }

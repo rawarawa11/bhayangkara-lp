@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Message = {
     text: string;
@@ -13,7 +12,6 @@ type Message = {
     timestamp: Date;
 };
 
-// ─── Config ───────────────────────────────────────────────────────────────────
 
 const QUICK_QUESTIONS = [
     'Apa saja layanan yang tersedia?',
@@ -26,9 +24,7 @@ const QUICK_QUESTIONS = [
 
 const GREETING = 'Halo! 👋 Saya **Asisten Virtual RS Bhayangkara**. Saya siap membantu menjawab pertanyaan Anda seputar layanan rumah sakit.\n\nSilakan pilih topik di bawah atau ketik pertanyaan Anda.';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Render plain-text with **bold** and newlines into JSX */
 function renderText(text: string) {
     return text.split('\n').map((line, lineIdx) => {
         const parts = line.split(/(\*\*[^*]+\*\*)/g);
@@ -49,7 +45,6 @@ function formatTime(date: Date) {
     return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 }
 
-// ─── Subcomponents ────────────────────────────────────────────────────────────
 
 function BotAvatar() {
     return (
@@ -96,7 +91,6 @@ function QuickQuestions({ onSelect }: { onSelect: (q: string) => void }) {
     );
 }
 
-// ─── Main Widget ──────────────────────────────────────────────────────────────
 
 export default function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
@@ -108,7 +102,6 @@ export default function ChatWidget() {
     const viewportRef = useRef<HTMLDivElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
-    // Only show quick questions before the first user message
     const hasUserMessage = messages.some(m => !m.isBot);
 
     const scrollToBottom = () => {
@@ -138,7 +131,6 @@ export default function ChatWidget() {
         setIsLoading(true);
 
         try {
-            // Attach CSRF token if available (web session cookies)
             const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
 
             const response = await axios.post('/api/chat', { message: userMsg }, {
@@ -163,7 +155,6 @@ export default function ChatWidget() {
         setInput('');
     };
 
-    // ── Closed state: FAB button ──────────────────────────────────────────────
     if (!isOpen) {
         return (
             <button
@@ -172,25 +163,18 @@ export default function ChatWidget() {
                 className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white z-50 transition-all duration-300 hover:scale-110 hover:shadow-blue-300/50 flex items-center justify-center group"
             >
                 <MessageCircle className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
-                {/* Pulse ring */}
                 <span className="absolute inset-0 rounded-full animate-ping bg-blue-400 opacity-25 pointer-events-none" />
             </button>
         );
     }
 
-    // ── Open state: Chat panel ────────────────────────────────────────────────
     return (
         <div className="fixed bottom-6 right-6 w-[350px] sm:w-[390px] h-[560px] flex flex-col shadow-2xl z-50 rounded-2xl ring-1 ring-black/10 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300 bg-white">
 
-            {/* Header */}
             <div className="shrink-0 bg-white border-b border-slate-100">
-                {/* Top strip — blue accent */}
                 <div className="h-1 w-full bg-blue-600" />
-
                 <div className="flex items-center justify-between px-4 py-3">
-                    {/* Identity */}
                     <div className="flex items-center gap-3">
-                        {/* Hospital logo */}
                         <div className="relative shrink-0">
                             <img
                                 src="/images/logo-rs.webp"
@@ -201,11 +185,9 @@ export default function ChatWidget() {
                                     (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
                                 }}
                             />
-                            {/* Fallback initials */}
                             <div className="h-9 w-9 rounded-lg bg-blue-600 items-center justify-center hidden">
                                 <span className="text-xs font-black text-white">RS</span>
                             </div>
-                            {/* Online dot */}
                             <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
                         </div>
 
@@ -222,7 +204,6 @@ export default function ChatWidget() {
                         </div>
                     </div>
 
-                    {/* Controls */}
                     <div className="flex items-center gap-0.5">
                         <button
                             onClick={handleReset}
@@ -242,7 +223,6 @@ export default function ChatWidget() {
                 </div>
             </div>
 
-            {/* Messages area */}
             <div className="flex-1 min-h-0 bg-slate-50/80 flex flex-col">
                 <div className="flex-1 overflow-y-auto px-4 py-4" ref={viewportRef}>
                     <div className="space-y-4">
@@ -254,7 +234,6 @@ export default function ChatWidget() {
                                     msg.isBot ? "justify-start items-end" : "justify-end items-end"
                                 )}
                             >
-                                {/* Bot avatar — only left side */}
                                 {msg.isBot && <BotAvatar />}
 
                                 <div className={cn(
@@ -276,18 +255,15 @@ export default function ChatWidget() {
                             </div>
                         ))}
 
-                        {/* Typing indicator */}
                         {isLoading && <TypingIndicator />}
                     </div>
                 </div>
 
-                {/* Quick question chips — only before first user message */}
                 {!hasUserMessage && !isLoading && (
                     <QuickQuestions onSelect={(q) => sendMessage(q)} />
                 )}
             </div>
 
-            {/* Input area */}
             <div className="px-3 py-3 bg-white border-t border-slate-100 shrink-0">
                 <form
                     onSubmit={(e) => { e.preventDefault(); sendMessage(); }}

@@ -12,7 +12,6 @@ import 'dayjs/locale/id'
 
 dayjs.locale('id')
 
-// Data Types
 type Schedule = {
     id: number
     doctor_name: string
@@ -27,13 +26,8 @@ const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
 
 export default function PublicList({ schedules }: { schedules: Schedule[] }) {
     const [searchTerm, setSearchTerm] = useState('')
-
-    // Determine today's day to set as default tab
-    // dayjs().format('dddd') returns 'Senin', 'Selasa', etc. in 'id' locale
     const today = dayjs().format('dddd')
     const defaultTab = DAYS.includes(today) ? today : 'Senin'
-
-    // Filter logic
     const filteredSchedules = schedules.filter(item =>
         item.doctor_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.specialist.toLowerCase().includes(searchTerm.toLowerCase())
@@ -45,42 +39,38 @@ export default function PublicList({ schedules }: { schedules: Schedule[] }) {
 
             <div className="min-h-screen bg-slate-50">
 
-                {/* --- 1. Page Header --- */}
-                <div className="bg-white border-b border-slate-200">
-                    <div className="container mx-auto max-w-7xl px-4 py-16 text-center lg:text-left lg:py-20">
-                        <div className="max-w-3xl">
-                            <Badge className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-200 border-none px-3 py-1">
-                                Poliklinik Eksekutif & Reguler
-                            </Badge>
-                            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                                Jadwal Praktik Dokter
-                            </h1>
-                            <p className="mt-4 text-lg text-slate-600 leading-relaxed">
-                                Temukan jadwal terkini dokter spesialis kami. Silakan datang 30 menit sebelum jam praktik dimulai untuk proses pendaftaran.
-                            </p>
+                <div className="bg-slate-900 text-white pt-20 pb-32">
+                    <div className="container mx-auto max-w-7xl px-4 text-center">
+                        <Badge className="mb-4 bg-blue-600 hover:bg-blue-700 text-white border-none px-3 py-1">
+                            Poliklinik Eksekutif & Reguler
+                        </Badge>
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+                            Jadwal Praktik Dokter
+                        </h1>
+                        <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                            Temukan jadwal terkini dokter spesialis kami. Silakan datang 30 menit sebelum jam praktik dimulai untuk proses pendaftaran.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="-mt-8 max-w-7xl mx-auto mb-8 relative z-10">
+                    <div className="bg-white rounded-xl shadow-md border border-slate-100 p-4 md:p-6 flex flex-col md:flex-row items-center gap-4">
+                        <div className="relative w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                            <Input
+                                type="text"
+                                placeholder="Cari nama dokter atau spesialis..."
+                                className="pl-10 h-12 border-slate-200 bg-slate-50 focus:bg-white text-base focus-visible:ring-blue-500"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
                     </div>
                 </div>
 
-                <div className="container mx-auto max-w-7xl px-4 py-12">
+                <div className="container mx-auto max-w-7xl px-4 py-8">
 
-                    {/* --- 2. Search Bar --- */}
-                    <div className="mb-8 relative max-w-md">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-5 w-5 text-slate-400" />
-                        </div>
-                        <Input
-                            type="text"
-                            placeholder="Cari nama dokter atau spesialis..."
-                            className="pl-10 h-12 bg-white border-slate-200 focus:border-blue-500 shadow-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-
-                    {/* --- 3. Weekly Tabs --- */}
                     <Tabs defaultValue={defaultTab} className="w-full">
-                        {/* Scrollable Tab List for Mobile */}
                         <div className="overflow-x-auto pb-4 mb-4 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
                             <TabsList className="h-auto p-1 bg-white border border-slate-200 rounded-xl inline-flex w-auto min-w-full md:w-full md:grid md:grid-cols-7 gap-1">
                                 {DAYS.map((day) => (
@@ -95,7 +85,6 @@ export default function PublicList({ schedules }: { schedules: Schedule[] }) {
                             </TabsList>
                         </div>
 
-                        {/* Tab Contents */}
                         {DAYS.map((day) => {
                             const daysSchedules = filteredSchedules.filter(s => s.day === day)
 
@@ -115,7 +104,6 @@ export default function PublicList({ schedules }: { schedules: Schedule[] }) {
                         })}
                     </Tabs>
 
-                    {/* --- 4. Information Note --- */}
                     <div className="mt-16 p-6 bg-blue-50 rounded-xl border border-blue-100 flex items-start gap-4">
                         <div className="p-2 bg-blue-100 rounded-lg text-blue-600 shrink-0">
                             <CalendarDays className="h-6 w-6" />
@@ -135,13 +123,11 @@ export default function PublicList({ schedules }: { schedules: Schedule[] }) {
     )
 }
 
-// --- Sub-Component: Doctor Card ---
 function DoctorCard({ schedule }: { schedule: Schedule }) {
     return (
         <Card className="group overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
             <CardContent className="p-0">
                 <div className="p-6 flex items-start gap-5">
-                    {/* Avatar */}
                     <div className="relative">
                         <Avatar className="h-16 w-16 border-2 border-slate-100 group-hover:border-blue-100 transition-colors">
                             <AvatarImage
@@ -152,7 +138,6 @@ function DoctorCard({ schedule }: { schedule: Schedule }) {
                                 <UserRound className="h-8 w-8" />
                             </AvatarFallback>
                         </Avatar>
-                        {/* Status Dot */}
                         <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white bg-emerald-500"></span>
                     </div>
 
@@ -167,7 +152,6 @@ function DoctorCard({ schedule }: { schedule: Schedule }) {
                     </div>
                 </div>
 
-                {/* Time Strip */}
                 <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
                         <Clock className="h-4 w-4 text-blue-600" />

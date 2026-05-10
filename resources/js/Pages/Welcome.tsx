@@ -49,11 +49,8 @@ export default function Welcome() {
             <Navbar />
 
             <main>
-                {/* Above the fold — eagerly loaded, drives FCP & LCP */}
                 <HeroSection user={user} />
-
-                {/* Below the fold — lazy loaded to unblock initial render */}
-                <Suspense fallback={null}>
+                <Suspense fallback={<div className="min-h-screen" />}>
                     <FeaturedSection/>
                     <MedicineSection medicines={featuredMedicines} />
                     <DoctorScheduleSection schedules={schedules}/>

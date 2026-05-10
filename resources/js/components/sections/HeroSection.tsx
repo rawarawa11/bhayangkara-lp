@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react'
-import { route } from 'ziggy-js' // Ensure you import route
+import { route } from 'ziggy-js'
 import { Button } from '@/components/ui/button'
 import LoginDialog from '@/Pages/Auth/LoginDialog'
 import { ArrowRight, ShieldCheck, Clock, Activity, MapPin } from 'lucide-react'
@@ -22,22 +22,9 @@ export default function HeroSection({ user }: HeroProps) {
 
     return (
         <section className="relative overflow-hidden bg-white pt-16 pb-20 lg:pt-24 lg:pb-32">
-            {/* Decorative background — isolated from layout/paint using contain:strict */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none" aria-hidden="true" style={{contain:'strict'}}>
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/40 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-100/40 rounded-full translate-y-1/3 -translate-x-1/4"></div>
-            </div>
-
             <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative z-10">
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     <div className="max-w-2xl text-center lg:text-left mx-auto lg:mx-0">
-
-                        {/* Pill Badge */}
-                        <div className="inline-flex items-center rounded-full border border-blue-100 bg-blue-50/80 px-3 py-1 text-xs font-semibold text-blue-700 mb-6 backdrop-blur-sm">
-                            <span className="flex h-2 w-2 rounded-full bg-blue-600 mr-2 animate-pulse"></span>
-                            Rumah Sakit Bhayangkara Tingkat II
-                        </div>
-
                         <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl md:text-6xl mb-6 leading-[1.15]">
                             Layanan Kesehatan <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">Presisi</span> & Terpercaya
                         </h1>
@@ -127,11 +114,7 @@ export default function HeroSection({ user }: HeroProps) {
                                 </div>
                             </div>
                         </div>
-
-                        <div aria-hidden="true" className="absolute -z-10 -top-12 -right-12 w-64 h-64 bg-blue-100 rounded-full opacity-50" style={{contain:'strict'}}></div>
-                        <div aria-hidden="true" className="absolute -z-10 -bottom-12 -left-12 w-64 h-64 bg-amber-50 rounded-full opacity-50" style={{contain:'strict'}}></div>
                     </div>
-
                 </div>
             </div>
         </section>

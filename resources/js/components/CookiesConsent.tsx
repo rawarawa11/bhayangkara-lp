@@ -2,16 +2,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { X, Cookie } from 'lucide-react'
-import { AnimatePresence, motion } from 'framer-motion' // Optional: install framer-motion for smooth animation
 
 export default function CookieConsent() {
     const [isVisible, setIsVisible] = useState(false)
 
     useEffect(() => {
-        // Cek apakah user sudah pernah setuju
         const consent = localStorage.getItem('cookie_consent')
         if (!consent) {
-            // Beri sedikit delay agar tidak kaget saat load page
             const timer = setTimeout(() => setIsVisible(true), 1000)
             return () => clearTimeout(timer)
         }
@@ -26,7 +23,6 @@ export default function CookieConsent() {
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-center pointer-events-none">
-            {/* Pointer events auto agar bisa klik tombol, tapi area kosong tembus pandang */}
             <Card className="pointer-events-auto w-full max-w-4xl bg-white/95 backdrop-blur shadow-2xl border-t md:border md:rounded-xl p-4 md:p-6 flex flex-col md:flex-row items-center gap-4 md:gap-8 animate-in slide-in-from-bottom-10 fade-in duration-500">
 
                 <div className="flex items-start gap-4 flex-1">

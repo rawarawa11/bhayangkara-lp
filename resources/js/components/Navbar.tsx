@@ -187,7 +187,7 @@ export default function Navbar() {
                                                 </NavigationMenuLink>
                                             </li>
 
-                                            <div className="flex flex-col gap-2">
+                                            <div className="flex flex-col gap-2 min-w-0">
                                                 <div className="px-2 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                                                     Terbaru
                                                 </div>
@@ -356,7 +356,7 @@ export default function Navbar() {
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-xs font-semibold text-slate-800 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
+                                                        <p className="text-xs font-semibold text-slate-800 group-hover:text-blue-700 transition-colors truncate leading-snug">
                                                             {article.title}
                                                         </p>
                                                         <p className="text-[10px] text-slate-400 mt-1">
@@ -465,7 +465,7 @@ const ListItem = ({ className, title, image, date, body, href, ...props }: any) 
                         <div className="text-sm font-bold text-slate-900 leading-snug group-hover:text-blue-700 truncate">
                             {title}
                         </div>
-                        <div className="line-clamp-2 text-xs leading-relaxed text-slate-500">
+                        <div className="truncate text-xs leading-relaxed text-slate-500">
                             {body || 'Belum ada deskripsi.'}
                         </div>
                         <div className="text-[10px] font-medium text-slate-400 mt-0.5 flex items-center gap-1">
