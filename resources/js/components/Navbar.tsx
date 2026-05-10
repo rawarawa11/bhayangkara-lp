@@ -12,7 +12,12 @@ import {
 } from '@/components/ui/navigation-menu'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import dayjs from 'dayjs'
+
+const MONTHS_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+const fmtDate = (iso: string) => {
+    const d = new Date(iso)
+    return `${String(d.getDate()).padStart(2,'0')} ${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`
+}
 import {
     LayoutDashboard,
     LogIn,
@@ -109,19 +114,33 @@ export default function Navbar() {
 
                     <Link href="/" className="flex items-center gap-3 group" onClick={closeMobile}>
                         <div className="flex items-center gap-2.5">
-                            <img
-                                src="/images/logo-polri.png"
-                                alt="Logo Polri"
-                                className="h-9 lg:h-11 w-auto object-contain drop-shadow-sm transition-transform group-hover:scale-105"
-                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                            />
+                            <picture>
+                                <source srcSet="/images/logo-polri.webp" type="image/webp" />
+                                <img
+                                    src="/images/logo-polri.png"
+                                    alt="Logo Polri"
+                                    width={44}
+                                    height={44}
+                                    loading="eager"
+                                    decoding="async"
+                                    className="h-9 lg:h-11 w-auto object-contain drop-shadow-sm transition-transform group-hover:scale-105"
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                            </picture>
                             <div className="h-8 w-[1px] bg-slate-200"></div>
-                            <img
-                                src="/images/logo-rs.webp"
-                                alt="Logo RS Bhayangkara"
-                                className="h-9 lg:h-11 w-auto object-contain drop-shadow-sm transition-transform group-hover:scale-105"
-                                onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/transparent/png?text=RS'; }}
-                            />
+                            <picture>
+                                <source srcSet="/images/logo-rs-opt.webp" type="image/webp" />
+                                <img
+                                    src="/images/logo-rs.webp"
+                                    alt="Logo RS Bhayangkara"
+                                    width={44}
+                                    height={44}
+                                    loading="eager"
+                                    decoding="async"
+                                    className="h-9 lg:h-11 w-auto object-contain drop-shadow-sm transition-transform group-hover:scale-105"
+                                    onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/transparent/png?text=RS'; }}
+                                />
+                            </picture>
                         </div>
                         <div className="hidden sm:flex flex-col justify-center">
                             <span className="text-[9px] lg:text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase leading-none mb-1">
@@ -341,7 +360,7 @@ export default function Navbar() {
                                                             {article.title}
                                                         </p>
                                                         <p className="text-[10px] text-slate-400 mt-1">
-                                                            {dayjs(article.published_at).format('DD MMM YYYY')}
+                                                            {fmtDate(article.published_at)}
                                                         </p>
                                                     </div>
                                                 </Link>
@@ -451,7 +470,7 @@ const ListItem = ({ className, title, image, date, body, href, ...props }: any) 
                         </div>
                         <div className="text-[10px] font-medium text-slate-400 mt-0.5 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0"></span>
-                            {dayjs(date).format('DD MMM YYYY')}
+                            {fmtDate(date)}
                         </div>
                     </div>
                 </Link>

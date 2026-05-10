@@ -22,9 +22,10 @@ export default function HeroSection({ user }: HeroProps) {
 
     return (
         <section className="relative overflow-hidden bg-white pt-16 pb-20 lg:pt-24 lg:pb-32">
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-50/50 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
+            {/* Decorative background — isolated from layout/paint using contain:strict */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none" aria-hidden="true" style={{contain:'strict'}}>
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/40 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-slate-100/40 rounded-full translate-y-1/3 -translate-x-1/4"></div>
             </div>
 
             <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative z-10">
@@ -95,11 +96,19 @@ export default function HeroSection({ user }: HeroProps) {
 
                     <div className="relative hidden lg:block">
                         <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200/60 bg-white h-[480px]">
-                            <img
-                                src="/images/rs-gambar.jpeg"
-                                alt="Fasilitas RS Bhayangkara"
-                                className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-1000"
-                            />
+                            <picture>
+                                <source srcSet="/images/rs-gambar.webp" type="image/webp" />
+                                <img
+                                    src="/images/rs-gambar.jpeg"
+                                    alt="Fasilitas RS Bhayangkara"
+                                    width={720}
+                                    height={480}
+                                    fetchPriority="high"
+                                    loading="eager"
+                                    decoding="sync"
+                                    className="w-full h-full object-cover object-center"
+                                />
+                            </picture>
 
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                             <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/50">
@@ -119,8 +128,8 @@ export default function HeroSection({ user }: HeroProps) {
                             </div>
                         </div>
 
-                        <div className="absolute -z-10 -top-12 -right-12 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
-                        <div className="absolute -z-10 -bottom-12 -left-12 w-64 h-64 bg-amber-50 rounded-full blur-3xl opacity-50"></div>
+                        <div aria-hidden="true" className="absolute -z-10 -top-12 -right-12 w-64 h-64 bg-blue-100 rounded-full opacity-50" style={{contain:'strict'}}></div>
+                        <div aria-hidden="true" className="absolute -z-10 -bottom-12 -left-12 w-64 h-64 bg-amber-50 rounded-full opacity-50" style={{contain:'strict'}}></div>
                     </div>
 
                 </div>

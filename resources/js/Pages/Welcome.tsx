@@ -1,17 +1,20 @@
 // resources/js/Pages/Welcome.tsx
+import { lazy, Suspense } from 'react'
 import { Head, usePage } from '@inertiajs/react'
 import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/sections/HeroSection'
-import FeaturedSection from '@/components/sections/FeaturedSection'
-import ArticlesSection from '@/components/sections/ArticleSection'
-import Footer from '@/components/Footer'
 import { ArticleSummary, Medicine } from '@/types'
-import CtaSection from "@/components/sections/CtaSection";
-import ChatWidget from "@/components/ChatWidget";
-import CookieConsent from "@/components/CookiesConsent"
-import FaqSection from "@/components/sections/Faq";
-import DoctorScheduleSection from "@/components/sections/ScheduleSection";
-import MedicineSection from "@/components/sections/MedicineSection";
+
+// Lazy-load all below-the-fold sections — keeps initial JS bundle small
+const FeaturedSection      = lazy(() => import('@/components/sections/FeaturedSection'))
+const MedicineSection      = lazy(() => import('@/components/sections/MedicineSection'))
+const DoctorScheduleSection = lazy(() => import('@/components/sections/ScheduleSection'))
+const ArticlesSection      = lazy(() => import('@/components/sections/ArticleSection'))
+const FaqSection           = lazy(() => import('@/components/sections/Faq'))
+const CtaSection           = lazy(() => import('@/components/sections/CtaSection'))
+const Footer               = lazy(() => import('@/components/Footer'))
+const ChatWidget           = lazy(() => import('@/components/ChatWidget'))
+const CookieConsent        = lazy(() => import('@/components/CookiesConsent'))
 
 type User = {
     id: number;
@@ -46,17 +49,25 @@ export default function Welcome() {
             <Navbar />
 
             <main>
+                {/* Above the fold — eagerly loaded, drives FCP & LCP */}
                 <HeroSection user={user} />
-                <FeaturedSection/>
-                <MedicineSection medicines={featuredMedicines} />
-                <DoctorScheduleSection schedules={schedules}/>
-                <ArticlesSection articles={latestArticles ?? []} />
-                <FaqSection/>
-                <CtaSection/>
+
+                {/* Below the fold — lazy loaded to unblock initial render */}
+                <Suspense fallback={null}>
+                    <FeaturedSection/>
+                    <MedicineSection medicines={featuredMedicines} />
+                    <DoctorScheduleSection schedules={schedules}/>
+                    <ArticlesSection articles={latestArticles ?? []} />
+                    <FaqSection/>
+                    <CtaSection/>
+                </Suspense>
             </main>
-            <Footer />
-            <ChatWidget />
-            <CookieConsent/>
+
+            <Suspense fallback={null}>
+                <Footer />
+                <ChatWidget />
+                <CookieConsent/>
+            </Suspense>
         </>
     )
 }
