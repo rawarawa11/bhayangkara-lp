@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('doctor_schedules', function (Blueprint $table) {
             $table->dropColumn(['doctor_name', 'specialist']);
-            $table->foreignId('doctor_id')->after('id')->constrained('doctors')->cascadeOnDelete();
+            $table->foreignId('doctor_id')->nullable()->after('id')->constrained('doctors')->cascadeOnDelete();
         });
     }
 
