@@ -19,12 +19,13 @@ import {
     Activity
 } from 'lucide-react'
 
+import { Doctor } from '@/types'
+
 const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
-export default function ScheduleCreate() {
+export default function ScheduleCreate({ doctors }: { doctors: Doctor[] }) {
     const { data, setData, post, processing, errors } = useForm({
-        doctor_name: '',
-        specialist: '',
+        doctor_id: '',
         day: 'Senin',
         time_start: '08:00',
         time_end: '12:00',
@@ -78,34 +79,26 @@ export default function ScheduleCreate() {
                                 </CardHeader>
                                 <CardContent className="px-6 grid gap-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="doctor_name">Nama Dokter <span className="text-red-500">*</span></Label>
-                                        <div className="relative">
-                                            <UserRound className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                            <Input
-                                                id="doctor_name"
-                                                placeholder="Contoh: dr. Budi Santoso, Sp.PD"
-                                                value={data.doctor_name}
-                                                onChange={e => setData('doctor_name', e.target.value)}
-                                                className="pl-9 h-11 text-base"
-                                                autoFocus
-                                            />
-                                        </div>
-                                        {errors.doctor_name && <p className="text-sm text-red-500">{errors.doctor_name}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="specialist">Spesialis / Poli <span className="text-red-500">*</span></Label>
-                                        <div className="relative">
-                                            <Stethoscope className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                            <Input
-                                                id="specialist"
-                                                placeholder="Contoh: Spesialis Penyakit Dalam"
-                                                value={data.specialist}
-                                                onChange={e => setData('specialist', e.target.value)}
-                                                className="pl-9 h-11 text-base"
-                                            />
-                                        </div>
-                                        {errors.specialist && <p className="text-sm text-red-500">{errors.specialist}</p>}
+                                        <Label htmlFor="doctor_id">Pilih Dokter <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={data.doctor_id}
+                                            onValueChange={val => setData('doctor_id', val)}
+                                        >
+                                            <SelectTrigger className="h-11 bg-white">
+                                                <div className="flex items-center gap-2 text-slate-600">
+                                                    <UserRound className="h-4 w-4" />
+                                                    <SelectValue placeholder="Pilih Dokter..." />
+                                                </div>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {doctors.map(doc => (
+                                                    <SelectItem key={doc.id} value={doc.id.toString()}>
+                                                        {doc.name} - {doc.specialist}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.doctor_id && <p className="text-sm text-red-500">{errors.doctor_id}</p>}
                                     </div>
                                 </CardContent>
                             </Card>

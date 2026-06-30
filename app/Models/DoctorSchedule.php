@@ -11,8 +11,7 @@ class DoctorSchedule extends Model
     use HasFactory;
     protected $table = 'doctor_schedules';
     protected $fillable = [
-        'doctor_name',
-        'specialist',
+        'doctor_id',
         'day',
         'time_start',
         'time_end',
@@ -40,5 +39,10 @@ class DoctorSchedule extends Model
 
         $todayIndo = $days[date('l')] ?? 'Senin';
         return $query->where('day', $todayIndo);
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
     }
 }

@@ -19,24 +19,15 @@ import {
     Activity
 } from 'lucide-react'
 
+import { Doctor, Schedule } from '@/types'
+
 const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
-type Schedule = {
-    id: number;
-    doctor_name: string;
-    specialist: string;
-    day: string;
-    time_start: string;
-    time_end: string;
-    is_available: boolean;
-}
-
 export default function ScheduleEdit() {
-    const { schedule } = usePage<{ schedule: Schedule }>().props
+    const { schedule, doctors } = usePage<{ schedule: Schedule, doctors: Doctor[] }>().props
 
     const { data, setData, put, processing, errors } = useForm({
-        doctor_name: schedule.doctor_name,
-        specialist: schedule.specialist,
+        doctor_id: schedule.doctor_id?.toString() || '',
         day: schedule.day,
         time_start: schedule.time_start?.substring(0, 5),
         time_end: schedule.time_end?.substring(0, 5),
@@ -50,7 +41,7 @@ export default function ScheduleEdit() {
 
     return (
         <AdminLayout title="Edit Jadwal">
-            <Head title={`Edit Jadwal - ${schedule.doctor_name}`} />
+            <Head title={`Edit Jadwal`} />
 
             <form onSubmit={submit} className="flex flex-col min-h-[calc(100vh-4rem)]">
                 <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-white/80 p-6 py-4 backdrop-blur-sm">
@@ -66,7 +57,7 @@ export default function ScheduleEdit() {
                                 Edit Jadwal Praktik
                             </h1>
                             <p className="text-xs text-slate-500 line-clamp-1">
-                                Memperbarui data untuk dr. {schedule.doctor_name}
+                                Memperbarui data untuk jadwal ini
                             </p>
                         </div>
                     </div>
@@ -94,31 +85,26 @@ export default function ScheduleEdit() {
                                 </CardHeader>
                                 <CardContent className="px-6 grid gap-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="doctor_name">Nama Dokter <span className="text-red-500">*</span></Label>
-                                        <div className="relative">
-                                            <UserRound className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                            <Input
-                                                id="doctor_name"
-                                                value={data.doctor_name}
-                                                onChange={e => setData('doctor_name', e.target.value)}
-                                                className="pl-9 h-11 text-base"
-                                            />
-                                        </div>
-                                        {errors.doctor_name && <p className="text-sm text-red-500">{errors.doctor_name}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="specialist">Spesialis / Poli <span className="text-red-500">*</span></Label>
-                                        <div className="relative">
-                                            <Stethoscope className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                            <Input
-                                                id="specialist"
-                                                value={data.specialist}
-                                                onChange={e => setData('specialist', e.target.value)}
-                                                className="pl-9 h-11 text-base"
-                                            />
-                                        </div>
-                                        {errors.specialist && <p className="text-sm text-red-500">{errors.specialist}</p>}
+                                        <Label htmlFor="doctor_id">Pilih Dokter <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={data.doctor_id}
+                                            onValueChange={val => setData('doctor_id', val)}
+                                        >
+                                            <SelectTrigger className="h-11 bg-white">
+                                                <div className="flex items-center gap-2 text-slate-600">
+                                                    <UserRound className="h-4 w-4" />
+                                                    <SelectValue placeholder="Pilih Dokter..." />
+                                                </div>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {doctors.map(doc => (
+                                                    <SelectItem key={doc.id} value={doc.id.toString()}>
+                                                        {doc.name} - {doc.specialist}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.doctor_id && <p className="text-sm text-red-500">{errors.doctor_id}</p>}
                                     </div>
                                 </CardContent>
                             </Card>

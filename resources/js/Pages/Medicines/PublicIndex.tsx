@@ -53,7 +53,6 @@ const MedicineCard = ({ medicine }: { medicine: Medicine }) => {
                     </div>
                 )}
 
-                {/* Availability Overlay Badge */}
                 <div className="absolute top-3 right-3">
                     {medicine.is_available ? (
                         <Badge className="bg-emerald-600 text-white border-0 shadow-md text-xs px-2.5 py-1 font-semibold">
@@ -176,7 +175,6 @@ export default function MedicinePublicIndex() {
                     </div>
                 </div>
 
-                {/* Info Banner */}
                 <div className="bg-blue-50 border-b border-blue-100">
                     <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -192,10 +190,7 @@ export default function MedicinePublicIndex() {
                     </div>
                 </div>
 
-                {/* Main Content */}
                 <div className="container mx-auto max-w-7xl px-4 py-8">
-
-                        {/* Search state / results header */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
                             <div>
                                 {filters.q ? (
@@ -233,7 +228,6 @@ export default function MedicinePublicIndex() {
                             )}
                         </div>
 
-                        {/* Grid */}
                         {medicines.data.length > 0 ? (
                             <>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

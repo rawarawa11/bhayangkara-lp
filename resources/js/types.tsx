@@ -77,10 +77,16 @@ export type Medicine = {
     updated_at: string;
 }
 
+export type Doctor = {
+    id: number;
+    name: string;
+    specialist: string;
+}
+
 export type Schedule = {
     id: number;
-    doctor_name: string;
-    specialist: string;
+    doctor_id: number;
+    doctor?: Doctor;
     day: string;
     time_start: string;
     time_end: string;

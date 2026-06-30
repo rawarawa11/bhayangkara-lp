@@ -4,8 +4,10 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoctorScheduleController;
+use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\MedicineController;
+use App\Http\Controllers\ProfileController;
 use App\Models\Article;
 use App\Models\DoctorSchedule;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +17,7 @@ use App\Http\Middleware\TrackVisitor;
 Route::get('/', function () {
     $latest_articles = Article::published()->latest()->take(3)->get();
 
-    $todays_schedules = DoctorSchedule::today()
+    $todays_schedules = DoctorSchedule::with('doctor')->today()
         ->where('is_available', true)
         ->orderBy('time_start')
         ->take(6)
@@ -57,6 +59,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('medicines', MedicineController::class);
         Route::resource('knowledge', KnowledgeBaseController::class)
             ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('doctors', DoctorController::class);
         Route::resource('schedules', DoctorScheduleController::class);
 
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     });

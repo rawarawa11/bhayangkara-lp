@@ -21,27 +21,23 @@ import {
     DialogTrigger
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
     MoreHorizontal,
     Pencil,
     Trash2,
     Loader2,
-    CalendarClock,
+    Hospital,
     Stethoscope,
-    Clock,
     UserRound, PlusCircle
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Schedule, PaginatedLink, PaginatedResponse } from '@/types'
+import { Doctor, PaginatedLink, PaginatedResponse } from '@/types'
 
 type Props = {
-    schedules: PaginatedResponse<Schedule>;
+    doctors: PaginatedResponse<Doctor>;
     q?: string;
 }
 
-
-function SchedulePagination({ links }: { links: PaginatedLink[] }) {
+function DoctorPagination({ links }: { links: PaginatedLink[] }) {
     const mappedLinks = useMemo(() => {
         return links.map((l) => ({
             ...l,
@@ -77,31 +73,31 @@ function EmptyState({ q }: { q?: string }) {
     return (
         <div className="py-16 text-center text-muted-foreground">
             <div className="mx-auto h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                <CalendarClock className="h-8 w-8 text-slate-400" />
+                <Hospital className="h-8 w-8 text-slate-400" />
             </div>
             <h3 className="mt-2 text-lg font-semibold text-slate-900">
-                {q ? `Tidak ada jadwal untuk "${q}"` : 'Belum ada jadwal dokter'}
+                {q ? `Tidak ada dokter untuk "${q}"` : 'Belum ada data dokter'}
             </h3>
             <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">
-                {q ? 'Coba cari dengan nama dokter atau spesialis lain.' : 'Tambahkan jadwal praktik dokter untuk menampilkannya di sini.'}
+                {q ? 'Coba cari dengan nama atau spesialis lain.' : 'Tambahkan data dokter untuk menampilkannya di sini.'}
             </p>
             <Button asChild className="mt-6 bg-blue-600 hover:bg-blue-700 shadow-sm">
-                <Link href={route('schedules.create')}>
+                <Link href={route('doctors.create')}>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Tambah Jadwal
+                    Tambah Dokter
                 </Link>
             </Button>
         </div>
     )
 }
 
-function DeleteScheduleDialog({ schedule, children }: { schedule: Schedule, children: React.ReactNode }) {
+function DeleteDoctorDialog({ doctor, children }: { doctor: Doctor, children: React.ReactNode }) {
     const [open, setOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
 
     const handleDelete = () => {
         setIsDeleting(true)
-        router.delete(route("schedules.destroy", schedule.id), {
+        router.delete(route("doctors.destroy", doctor.id), {
             preserveScroll: true,
             onSuccess: () => {
                 setOpen(false)
@@ -118,10 +114,10 @@ function DeleteScheduleDialog({ schedule, children }: { schedule: Schedule, chil
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Hapus Jadwal?</DialogTitle>
+                    <DialogTitle>Hapus Dokter?</DialogTitle>
                     <DialogDescription>
-                        Anda akan menghapus jadwal praktik <strong>{schedule.doctor?.name}</strong> pada hari {schedule.day}.
-                        Tindakan ini tidak dapat dibatalkan.
+                        Anda akan menghapus data dokter <strong>{doctor.name}</strong>.
+                        Tindakan ini tidak dapat dibatalkan dan akan menghapus semua jadwal terkait.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="sm:justify-end">
@@ -143,8 +139,8 @@ function DeleteScheduleDialog({ schedule, children }: { schedule: Schedule, chil
     )
 }
 
-export function ScheduleTable({ schedules, q }: Props) {
-    if (schedules.data.length === 0) {
+export function DoctorTable({ doctors, q }: Props) {
+    if (doctors.data.length === 0) {
         return <EmptyState q={q} />
     }
 
@@ -154,56 +150,29 @@ export function ScheduleTable({ schedules, q }: Props) {
                 <Table>
                     <TableHeader className="bg-slate-50">
                         <TableRow>
-                            <TableHead className="pl-6 w-[250px]">Dokter</TableHead>
+                            <TableHead className="pl-6 w-[250px]">Nama Dokter</TableHead>
                             <TableHead>Spesialis</TableHead>
-                            <TableHead>Hari</TableHead>
-                            <TableHead>Jam Praktik</TableHead>
-                            <TableHead>Status</TableHead>
                             <TableHead className="w-[80px] text-right pr-6">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {schedules.data.map((schedule) => (
-                            <TableRow key={schedule.id} className="hover:bg-slate-50/50 transition-colors">
+                        {doctors.data.map((doctor) => (
+                            <TableRow key={doctor.id} className="hover:bg-slate-50/50 transition-colors">
                                 <TableCell className="pl-6 py-4">
                                     <div className="flex items-center gap-3">
                                         <div className="h-9 w-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
                                             <UserRound className="h-4 w-4" />
                                         </div>
                                         <div>
-                                            <div className="font-semibold text-slate-900">{schedule.doctor?.name}</div>
+                                            <div className="font-semibold text-slate-900">{doctor.name}</div>
                                         </div>
                                     </div>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2 text-slate-600">
                                         <Stethoscope className="h-4 w-4 text-slate-400" />
-                                        <span className="text-sm">{schedule.doctor?.specialist}</span>
+                                        <span className="text-sm">{doctor.specialist}</span>
                                     </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="outline" className="bg-white border-slate-200 text-slate-700 font-medium">
-                                        {schedule.day}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-                                        <Clock className="h-3.5 w-3.5 text-slate-400" />
-                                        <span>{schedule.time_start.substring(0, 5)} - {schedule.time_end.substring(0, 5)}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge
-                                        variant="outline"
-                                        className={cn(
-                                            "px-2.5 py-0.5 rounded-full text-xs font-bold border",
-                                            schedule.is_available
-                                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                                : "bg-slate-100 text-slate-500 border-slate-200"
-                                        )}
-                                    >
-                                        {schedule.is_available ? 'Hadir' : 'Cuti/Absen'}
-                                    </Badge>
                                 </TableCell>
                                 <TableCell className="text-right pr-6">
                                     <DropdownMenu>
@@ -215,19 +184,19 @@ export function ScheduleTable({ schedules, q }: Props) {
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-40">
                                             <DropdownMenuItem asChild>
-                                                <Link href={route('schedules.edit', schedule.id)} className="cursor-pointer">
-                                                    <Pencil className="mr-2 h-4 w-4" /> Edit Jadwal
+                                                <Link href={route('doctors.edit', doctor.id)} className="cursor-pointer">
+                                                    <Pencil className="mr-2 h-4 w-4" /> Edit Dokter
                                                 </Link>
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
-                                            <DeleteScheduleDialog schedule={schedule}>
+                                            <DeleteDoctorDialog doctor={doctor}>
                                                 <DropdownMenuItem
                                                     onSelect={(e) => e.preventDefault()}
                                                     className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
                                                 >
                                                     <Trash2 className="mr-2 h-4 w-4" /> Hapus
                                                 </DropdownMenuItem>
-                                            </DeleteScheduleDialog>
+                                            </DeleteDoctorDialog>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
@@ -238,7 +207,7 @@ export function ScheduleTable({ schedules, q }: Props) {
             </div>
 
             <div className="border-t border-slate-100 p-4">
-                <SchedulePagination links={schedules.links} />
+                <DoctorPagination links={doctors.links} />
             </div>
         </div>
     )

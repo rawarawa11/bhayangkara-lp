@@ -14,8 +14,11 @@ dayjs.locale('id')
 
 type Schedule = {
     id: number
-    doctor_name: string
-    specialist: string
+    doctor_id: number
+    doctor?: {
+        name: string
+        specialist: string
+    }
     day: string
     time_start: string
     time_end: string
@@ -29,8 +32,8 @@ export default function PublicList({ schedules }: { schedules: Schedule[] }) {
     const today = dayjs().format('dddd')
     const defaultTab = DAYS.includes(today) ? today : 'Senin'
     const filteredSchedules = schedules.filter(item =>
-        item.doctor_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.specialist.toLowerCase().includes(searchTerm.toLowerCase())
+        item.doctor?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.doctor?.specialist.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
     return (
@@ -131,8 +134,8 @@ function DoctorCard({ schedule }: { schedule: Schedule }) {
                     <div className="relative">
                         <Avatar className="h-16 w-16 border-2 border-slate-100 group-hover:border-blue-100 transition-colors">
                             <AvatarImage
-                                src={`https://ui-avatars.com/api/?name=${schedule.doctor_name}&background=eff6ff&color=2563eb&bold=true`}
-                                alt={schedule.doctor_name}
+                                src={`https://ui-avatars.com/api/?name=${schedule.doctor?.name}&background=eff6ff&color=2563eb&bold=true`}
+                                alt={schedule.doctor?.name}
                             />
                             <AvatarFallback className="bg-blue-50 text-blue-600">
                                 <UserRound className="h-8 w-8" />
@@ -143,11 +146,11 @@ function DoctorCard({ schedule }: { schedule: Schedule }) {
 
                     <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-lg text-slate-900 truncate group-hover:text-blue-700 transition-colors">
-                            {schedule.doctor_name}
+                            {schedule.doctor?.name}
                         </h3>
                         <div className="flex items-center gap-1.5 text-slate-500 text-sm mt-1 mb-3">
                             <Stethoscope className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                            <span className="truncate font-medium">{schedule.specialist}</span>
+                            <span className="truncate font-medium">{schedule.doctor?.specialist}</span>
                         </div>
                     </div>
                 </div>

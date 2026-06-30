@@ -55,6 +55,12 @@ const navManagement = [
         isActive: (currentRoute: string) => currentRoute.startsWith('knowledge.'),
     },
     {
+        title: "Dokter",
+        url: "doctors.index",
+        icon: Hospital,
+        isActive: (currentRoute: string) => currentRoute.startsWith('doctors.'),
+    },
+    {
         title: "Jadwal Dokter",
         url: "schedules.index",
         icon: Activity,
@@ -174,8 +180,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuItem>
 
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Pengaturan" className="text-slate-400 hover:text-white hover:bg-slate-800 mt-1">
-                            <Link href={"#"}>
+                        <SidebarMenuButton asChild tooltip="Pengaturan" isActive={currentRoute === 'profile.edit'} className="text-slate-400 hover:text-white hover:bg-slate-800 mt-1 data-[active=true]:bg-slate-800 data-[active=true]:text-white">
+                            <Link href={route('profile.edit')}>
                                 <Settings className="size-4" />
                                 <span>Pengaturan Akun</span>
                             </Link>

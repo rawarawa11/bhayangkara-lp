@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DoctorSchedule;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -11,7 +12,7 @@ class DoctorScheduleController extends Controller
 {
     public function publicList(): Response
     {
-        $schedules = DoctorSchedule::where('is_available', true)
+        $schedules = DoctorSchedule::with('doctor')->where('is_available', true)
             ->orderBy('time_start')
             ->get();
 
@@ -26,13 +27,12 @@ class DoctorScheduleController extends Controller
         $q = trim((string) $request->get('q', ''));
         // $sort = $request->get('sort', 'updated_desc');
 
-        $query = DoctorSchedule::query()
+        $query = DoctorSchedule::with('doctor')
             ->when($q, function ($query, $q) {
-                $query->where(function ($sub) use ($q) {
-                    $sub->where('doctor_name', 'like', "%{$q}%")
-                        ->orWhere('specialist', 'like', "%{$q}%")
-                        ->orWhere('day', 'like', "%{$q}%");
-                });
+                $query->whereHas('doctor', function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('specialist', 'like', "%{$q}%");
+                })->orWhere('day', 'like', "%{$q}%");
             })
             ->when($is_available !== 'all', function ($query) use ($is_available) {
                 $query->where('is_available', $is_available === 'available');
@@ -62,14 +62,16 @@ class DoctorScheduleController extends Controller
 
     public function create()
     {
-        return Inertia::render('DoctorSchedules/Create');
+        $doctors = Doctor::orderBy('name')->get();
+        return Inertia::render('DoctorSchedules/Create', [
+            'doctors' => $doctors
+        ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'doctor_name' => 'required|string|max:255',
-            'specialist' => 'required|string|max:255',
+            'doctor_id' => 'required|exists:doctors,id',
             'day' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'time_start' => 'required|date_format:H:i',
             'time_end' => 'required|date_format:H:i|after:time_start',
@@ -84,16 +86,17 @@ class DoctorScheduleController extends Controller
 
     public function edit(DoctorSchedule $schedule)
     {
+        $doctors = Doctor::orderBy('name')->get();
         return Inertia::render('DoctorSchedules/Edit', [
-            'schedule' => $schedule
+            'schedule' => $schedule,
+            'doctors' => $doctors
         ]);
     }
 
     public function update(Request $request, DoctorSchedule $schedule)
     {
         $data = $request->validate([
-            'doctor_name' => 'required|string|max:255',
-            'specialist' => 'required|string|max:255',
+            'doctor_id' => 'required|exists:doctors,id',
             'day' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'time_start' => 'required|date_format:H:i',
             'time_end' => 'required|date_format:H:i|after:time_start',

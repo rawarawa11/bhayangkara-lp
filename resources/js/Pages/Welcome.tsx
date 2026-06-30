@@ -5,9 +5,10 @@ import Navbar from '@/components/Navbar'
 import HeroSection from '@/components/sections/HeroSection'
 import { ArticleSummary, Medicine } from '@/types'
 
-// Lazy-load all below-the-fold sections — keeps initial JS bundle small
-const FeaturedSection      = lazy(() => import('@/components/sections/FeaturedSection'))
-const MedicineSection      = lazy(() => import('@/components/sections/MedicineSection'))
+import FeaturedSection from '@/components/sections/FeaturedSection'
+import MedicineSection from '@/components/sections/MedicineSection'
+
+// Lazy-load sections that are completely below the fold
 const DoctorScheduleSection = lazy(() => import('@/components/sections/ScheduleSection'))
 const ArticlesSection      = lazy(() => import('@/components/sections/ArticleSection'))
 const FaqSection           = lazy(() => import('@/components/sections/Faq'))
@@ -50,9 +51,9 @@ export default function Welcome() {
 
             <main>
                 <HeroSection user={user} />
+                <FeaturedSection/>
+                <MedicineSection medicines={featuredMedicines} />
                 <Suspense fallback={<div className="min-h-screen" />}>
-                    <FeaturedSection/>
-                    <MedicineSection medicines={featuredMedicines} />
                     <DoctorScheduleSection schedules={schedules}/>
                     <ArticlesSection articles={latestArticles ?? []} />
                     <FaqSection/>

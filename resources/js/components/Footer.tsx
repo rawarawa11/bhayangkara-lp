@@ -134,7 +134,7 @@ export default function Footer() {
                             <li className="flex items-start gap-3 text-slate-400">
                                 <MapPin className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
                                 <span className="leading-relaxed">
-                                    Jl. Teuku Nyak Arief No. 23, Jeulingke, Kec. Syiah Kuala, Kota Banda Aceh, Aceh 23114
+                                    Jl. Cut Nyak Dhien No.23, Lamtemen Bar., Kec. Jaya Baru, Kota Banda Aceh, Aceh 23232
                                 </span>
                             </li>
                             <li className="flex items-center gap-3 text-slate-400 group">
