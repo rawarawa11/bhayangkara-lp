@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('doctor_schedules', function (Blueprint $table) {
-            $table->dropColumn(['doctor_name', 'specialist']);
-            $table->foreignId('doctor_id')->nullable()->after('id')->constrained('doctors')->cascadeOnDelete();
+            if (Schema::hasColumn('doctor_schedules', 'doctor_name')) {
+                $table->dropColumn(['doctor_name', 'specialist']);
+            }
+            $table->unsignedBigInteger('doctor_id')->nullable()->after('id');
+            $table->foreign('doctor_id')->references('id')->on('doctors')->cascadeOnDelete();
         });
     }
 
