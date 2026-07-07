@@ -84,6 +84,7 @@ class MedicineController extends Controller
             $data['image'] = $this->storeImage($request->file('image'), $data['slug']);
         }
 
+        $data['created_by'] = auth()->id();
         $medicine = Medicine::create($data);
 
         return redirect()

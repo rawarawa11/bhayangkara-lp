@@ -40,6 +40,7 @@ class DoctorController extends Controller
             'specialist' => 'required|string|max:255',
         ]);
 
+        $data['created_by'] = auth()->id();
         Doctor::create($data);
 
         return redirect()->route('doctors.index')

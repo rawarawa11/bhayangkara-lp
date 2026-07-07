@@ -96,6 +96,7 @@ class KnowledgeBaseController extends Controller
             KnowledgeBase::create([
                 'content' => $content,
                 'embedding' => $embedding,
+                'created_by' => auth()->id(),
             ]);
 
         } catch (Throwable $e) {
