@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\KnowledgeBase;
+use App\Models\DoctorSchedule;
+use App\Models\Medicine;
 use Illuminate\Http\Request;
 use Gemini;
 use Throwable;
@@ -19,7 +21,7 @@ class ChatbotController extends Controller
         ]);
 
         $userQuestion = $validated['message'];
-        $context = null;
+        $ragContext = null;
 
         try {
             $apiKey = env('GEMINI_API_KEY');
@@ -40,14 +42,16 @@ class ChatbotController extends Controller
 
                 $similarityThreshold = 0.75;
                 if ($bestMatch && $bestMatch['score'] >= $similarityThreshold) {
-                    $context = $bestMatch['note']->content;
+                    $ragContext = $bestMatch['note']->content;
                 }
             }
-            $systemPrompt = $this->createSystemPrompt($context);
+            
+            $systemPrompt = $this->createSystemPrompt($ragContext);
 
-            $finalPrompt = $this->buildFinalPrompt($systemPrompt, $userQuestion, $context);
+            // Use the native systemInstruction API to prevent prompt injection
             $response = $client->generativeModel(model: 'gemini-2.5-flash')
-                ->generateContent($finalPrompt);
+                ->withSystemInstruction(\Gemini\Data\Content::parse($systemPrompt))
+                ->generateContent($userQuestion);
 
             return response()->json(['reply' => $response->text()]);
 
@@ -57,52 +61,70 @@ class ChatbotController extends Controller
         }
     }
 
-    /**
-     * Creates a dynamic system prompt based on whether context is available.
-     */
-    private function createSystemPrompt(?string $context): string
+    private function getPublicHospitalDataContext(): string
+    {
+        $medicines = Medicine::where('is_available', true)
+            ->select('name', 'description')
+            ->get()
+            ->toArray();
+
+        $schedules = DoctorSchedule::with(['doctor' => function ($query) {
+                $query->select('id', 'name', 'specialist');
+            }])
+            ->where('is_available', true)
+            ->select('doctor_id', 'day', 'time_start', 'time_end')
+            ->get()
+            ->toArray();
+        
+        $context = "DATA RUMAH SAKIT SAAT INI:\n\n";
+        
+        $context .= "DAFTAR OBAT YANG TERSEDIA:\n";
+        if (empty($medicines)) {
+            $context .= "- Belum ada data obat.\n";
+        } else {
+            foreach ($medicines as $med) {
+                $context .= "- {$med['name']}: {$med['description']}\n";
+            }
+        }
+
+        $context .= "\nJADWAL DOKTER:\n";
+        if (empty($schedules)) {
+            $context .= "- Belum ada jadwal dokter.\n";
+        } else {
+            foreach ($schedules as $sched) {
+                $doctorName = $sched['doctor']['name'] ?? 'Dokter Tidak Diketahui';
+                $specialist = $sched['doctor']['specialist'] ?? 'Umum';
+                $timeStart = substr($sched['time_start'], 0, 5);
+                $timeEnd = substr($sched['time_end'], 0, 5);
+                $context .= "- {$doctorName} ({$specialist}) praktik pada hari {$sched['day']} pukul {$timeStart} - {$timeEnd}.\n";
+            }
+        }
+
+        return $context;
+    }
+
+    private function createSystemPrompt(?string $ragContext): string
     {
         $basePrompt = "Anda adalah Asisten Virtual AI dari RS Bhayangkara Banda Aceh.
         Sapa pengguna dengan ramah (misalnya 'Halo!' atau 'Tentu, saya bantu').
         Jawablah dalam bahasa Indonesia yang profesional, sopan, dan empatik.
         Identitas Anda adalah asisten, bukan dokter. Jangan pernah memberikan diagnosis medis.
-        Anda boleh menjawab pertanyaan umum tentang kesehatan (seperti 'apa itu demam?').";
+        Anda akan diberikan Data Rumah Sakit (seperti daftar obat dan jadwal dokter) serta Konteks Tambahan.
+        Gunakan data tersebut untuk menjawab pertanyaan pengguna.
+        Jika pengguna menanyakan informasi spesifik yang tidak ada dalam data atau konteks (seperti biaya perawatan spesifik atau ketersediaan kamar), katakan dengan sopan bahwa Anda tidak memiliki informasi tersebut dan sarankan untuk menghubungi resepsionis kami di (0651) 123-456 atau datang langsung ke rumah sakit.";
 
-        if ($context) {
-            $ragInstruction = "PENTING: Untuk pertanyaan berikut, Anda HARUS menjawab HANYA berdasarkan konteks yang diberikan.
-            Jangan tambahkan informasi di luar konteks.
-            Jika jawaban tidak ada di dalam konteks, katakan 'Maaf, saya tidak memiliki informasi spesifik mengenai hal itu.'";
+        $hospitalData = $this->getPublicHospitalDataContext();
 
-            return $basePrompt . "\n\n" . $ragInstruction;
-        } else {
-            $generalInstruction = "Anda akan menjawab pertanyaan umum dari pengguna.
-            Jika pengguna menanyakan informasi spesifik tentang RS Bhayangkara (seperti jadwal dokter tertentu, biaya, atau nomor antrian) yang Anda tidak tahu, katakan dengan sopan:
-            'Untuk informasi spesifik seperti itu, saya sarankan untuk menghubungi resepsionis kami di (0651) 123-456 atau datang langsung ke rumah sakit.'";
+        $fullPrompt = $basePrompt . "\n\n" . "=== DATA STRUKTURAL (JADWAL & OBAT) ===\n" . $hospitalData;
 
-            return $basePrompt . "\n\n" . $generalInstruction;
+        if ($ragContext) {
+            $fullPrompt .= "\n\n=== KONTEKS TAMBAHAN DARI KNOWLEDGE BASE ===\n" . $ragContext;
         }
+
+        return $fullPrompt;
     }
 
-    /**
-     * Builds the final string to send to the Gemini API.
-     */
-    private function buildFinalPrompt(string $systemPrompt, string $userQuestion, ?string $context): string
-    {
-        if ($context) {
-            return $systemPrompt . "\n\n" .
-                "--- KONTEKS (GUNAKAN INI) ---:\n" . $context . "\n\n" .
-                "--- PERTANYAAN PENGGUNA ---:\n" . $userQuestion . "\n\n" .
-                "--- JAWABAN (HANYA DARI KONTEKS) ---:\n";
-        } else {
-            return $systemPrompt . "\n\n" .
-                "--- PERTANYAAN PENGGUNA ---:\n" . $userQuestion . "\n\n" .
-                "--- JAWABAN ---:\n";
-        }
-    }
 
-    /**
-     * Finds the best matching note from the collection.
-     */
     private function findBestMatch(array $questionVector, $allNotes): ?array
     {
         $bestScore = -1.0;
@@ -128,9 +150,7 @@ class ChatbotController extends Controller
         return ['note' => $bestNote, 'score' => $bestScore];
     }
 
-    /**
-     * Calculates the Cosine Similarity between two vectors.
-     */
+
     private function cosineSimilarity(array $a, array $b): float
     {
         $dotProduct = 0.0;
