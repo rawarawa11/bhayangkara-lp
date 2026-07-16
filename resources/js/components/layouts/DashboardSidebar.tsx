@@ -9,6 +9,7 @@ import {
     Hospital,
     Settings,
     Activity,
+    Bed,
 } from 'lucide-react'
 
 import {
@@ -65,6 +66,12 @@ const navManagement = [
         url: "schedules.index",
         icon: Activity,
         isActive: (currentRoute: string) => currentRoute.startsWith('schedules.'),
+    },
+    {
+        title: "Kamar & BPJS",
+        url: "rooms.index",
+        icon: Bed,
+        isActive: (currentRoute: string) => currentRoute.startsWith('rooms.'),
     },
 ]
 

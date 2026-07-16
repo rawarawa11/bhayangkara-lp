@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\KnowledgeBase;
 use App\Models\DoctorSchedule;
 use App\Models\Medicine;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Gemini;
 use Throwable;
@@ -76,6 +77,10 @@ class ChatbotController extends Controller
             ->get()
             ->toArray();
         
+        $rooms = Room::select('name', 'class', 'capacity', 'available', 'is_bpjs')
+            ->get()
+            ->toArray();
+        
         $context = "DATA RUMAH SAKIT SAAT INI:\n\n";
         
         $context .= "DAFTAR OBAT YANG TERSEDIA:\n";
@@ -97,6 +102,16 @@ class ChatbotController extends Controller
                 $timeStart = substr($sched['time_start'], 0, 5);
                 $timeEnd = substr($sched['time_end'], 0, 5);
                 $context .= "- {$doctorName} ({$specialist}) praktik pada hari {$sched['day']} pukul {$timeStart} - {$timeEnd}.\n";
+            }
+        }
+
+        $context .= "\nKETERSEDIAAN KAMAR (TERMASUK INFO BPJS):\n";
+        if (empty($rooms)) {
+            $context .= "- Belum ada data kamar.\n";
+        } else {
+            foreach ($rooms as $room) {
+                $bpjsStatus = $room['is_bpjs'] ? 'Menerima BPJS' : 'Non-BPJS';
+                $context .= "- Kamar {$room['name']} ({$room['class']}): Tersedia {$room['available']} dari total {$room['capacity']} kasur. Status: {$bpjsStatus}.\n";
             }
         }
 

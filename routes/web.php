@@ -60,7 +60,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('knowledge', KnowledgeBaseController::class)
             ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
         Route::resource('doctors', DoctorController::class);
-        Route::resource('schedules', DoctorScheduleController::class);
+        Route::resource('schedules', App\Http\Controllers\DoctorScheduleController::class)->except(['show']);
+        Route::resource('rooms', App\Http\Controllers\RoomController::class)->except(['show']);
 
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
